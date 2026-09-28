@@ -12,11 +12,18 @@ const TAXONOMY = {
   product:    { name: 'Продукт/метод',    color: '#eab308', note: 'как это работает технически' },
   economics:  { name: 'Экономика',        color: '#f97316', note: 'деньги, затраты, возврат' },
   risk:       { name: 'Риск и обратимость', color: '#ef4444', note: 'что будет, если не сработает' },
+  rules:      { name: 'Правила платформы', color: '#06b6d4', note: 'что YouTube разрешает и запрещает' },
   process:    { name: 'Процесс',          color: '#84cc16', note: 'шаги, повторяемость' },
   witness:    { name: 'Свидетельства',    color: '#3b82f6', note: 'сторонние источники' },
 };
 
 const STRENGTH = {
+  platform_docs: { w: 10, name: 'Справка платформы' },
+  verified_press:{ w: 8,  name: 'Пресса с проверкой документов' },
+  named_press:   { w: 6,  name: 'Отраслевая пресса' },
+  interview:     { w: 6,  name: 'Интервью/подкаст' },
+  vendor:        { w: 5,  name: 'Вендор' },
+  seofarm:       { w: 3,  name: 'SEO-ферма' },
   research:   { w: 9, name: 'Научное исследование' },
   demo:       { w: 8, name: 'Живая демонстрация' },
   endorse:    { w: 8, name: 'Рекомендация авторитета' },
@@ -61,7 +68,13 @@ function riskOf(c) {
   const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
   const overclaim = Math.max(0, (c.claimPower || 5) - w);   // голос выше доказательства
   const hollow   = (!c.sources || !c.sources.length) ? 3 : 0; // голословное вообще
-  const noN      = (c.sources || []).some(s => s.n === undefined || s.n === null) ? 1 : 0;
+  // 🔴 «Нет n» штрафует ТОЛЬКО статистику. Справка платформы и пресса с проверкой
+  //    документов — не выборка, им n неприменима. Иначе доказанное правило
+  //    YouTube получало бы штраф за отсутствие того, чего у него быть не может.
+  const SAMPLE_TYPES = ['platform_docs', 'verified_press', 'named_press'];
+  const kind = sourceKind({ type: c.type, url: c.sources && c.sources[0] && c.sources[0].url });
+  const noN = (!SAMPLE_TYPES.includes(kind) &&
+               (c.sources || []).some(s => s.n === undefined || s.n === null)) ? 1 : 0;
   // 🔴 Давление реальности: сколько живых людей в Reddit бьют именно в это утверждение.
   //    Новый член (дип-луп 9). Считается из OBJECTIONS.clusters[].hits.
   const pushback = (window.OBJECTIONS ? objectionLoad(c.id) : 0);
@@ -89,6 +102,39 @@ function objectionsFor(claimId) {
   return window.OBJECTIONS.clusters.filter(k => k.hits && k.hits.indexOf(claimId) !== -1);
 }
 
-window.ProofMap = { TAXONOMY, STRENGTH, auditClaim, riskOf, objectionLoad, objectionsFor };
+/** Вес источника по Бенчивенге: какое доказательство вообще способен дать этот тип
+ *  источника. Справка платформы = 10, самоотчёт в соцсети = 1.
+ *  Это ЗАКРЫВАЕТ долг «Trustpilot ≠ NYT»: вес задаётся типом источника, не автором. */
+function sourceWeight(s) {
+  if (!s || !s.src) return 5;
+  const T = (window.COMPETITOR_PROOF || {}).sourceWeights || {};
+  return (T[s.src] || { w: 5 }).w;
+}
+
+/** Сила наших источников по утверждению: берём самый сильный, а не сумму.
+ *  Сумма была бы накруткой — десять слабых цитат не дают сильного доказательства. */
+/** Ищет тип доказательства по URL — связывает утверждение с базой COMPETITOR_PROOF. */
+function sourceKind(s) {
+  if (!s) return null;
+  if (s.src) return s.src;
+  const db = (window.COMPETITOR_PROOF || {}).items || [];
+  const byUrl = s.url && db.find(x => x.url === s.url);
+  if (byUrl) return byUrl.src;
+  // иначе — по типу самого утверждения (platform_docs и т.п. живут в STRENGTH)
+  return s.type || null;
+}
+
+function bestSource(sources) {
+  if (!sources || !sources.length) return 0;
+  return Math.max.apply(null, sources.map(x => {
+    const k = sourceKind(x);
+    if (!k) return 5;                       // источник есть, тип неизвестен → нейтрально
+    if (STRENGTH[k]) return STRENGTH[k].w;  // справка платформы = 10
+    return sourceWeight({ src: k });        // пресса/вендор/интервью
+  }));
+}
+
+window.ProofMap = { TAXONOMY, STRENGTH, auditClaim, riskOf, objectionLoad, objectionsFor,
+                    sourceWeight, bestSource, sourceKind };
 if (typeof module !== 'undefined') module.exports = window.ProofMap;
 })();

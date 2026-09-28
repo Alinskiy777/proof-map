@@ -223,3 +223,42 @@
 [04:32:25]   comm r/ContentCreators «ai%20video%20chann» до 2026-09
 [04:32:33]     неудача (Timeout. Maybe slow down a bit) → пауза 14с
 [04:32:57]     неудача (Timeout. Maybe slow down a bit) → пауза 23с
+[04:34:22]     неудача (Timeout. Maybe slow down a bit) → пауза 34с
+[04:34:56]     ⚠ отказ, пропускаю этот запрос
+[04:34:56]   comm r/ContentCreators «ai%20slop» до 2026-09
+[04:35:17]     неудача (Expecting value: line 1 column 1 (char 0)) → пауза 16с
+[04:35:53]     неудача (Expecting value: line 1 column 1 (char 0)) → пауза 22с
+[04:36:36]     неудача (Expecting value: line 1 column 1 (char 0)) → пауза 36с
+[04:37:12]     ⚠ отказ, пропускаю этот запрос
+[04:37:12]   comm r/ContentCreators «youtube%20automati» до 2026-09
+[04:37:20]     +34 (всего 4120)
+[04:37:20]     меньше 100 — дошли до дна
+[04:37:20]   comm r/ContentCreators «video%20monetizati» до 2026-09
+[04:37:31]     +100 (всего 4211)
+[04:37:39]   comm r/ContentCreators «video%20monetizati» до 2025-01
+[04:37:45]     +4 (всего 4215)
+[04:37:45]     меньше 100 — дошли до дна
+[04:37:45]   comm r/VideoEditing «faceless» до 2026-09
+[04:37:54]     неудача (Timeout. Maybe slow down a bit) → пауза 13с
+[04:38:17]     неудача (Timeout. Maybe slow down a bit) → пауза 27с
+[04:38:53]     неудача (Timeout. Maybe slow down a bit) → пауза 34с
+[04:39:27]     ⚠ отказ, пропускаю этот запрос
+[04:39:27]   comm r/VideoEditing «faceless%20youtube» до 2026-09
+[04:39:36]     неудача (Timeout. Maybe slow down a bit) → пауза 13с
+[04:39:58]     неудача (Timeout. Maybe slow down a bit) → пауза 25с
+[04:40:34]     неудача (Timeout. Maybe slow down a bit) → пауза 36с
+[04:41:10]     ⚠ отказ, пропускаю этот запрос
+[04:41:10]   comm r/VideoEditing «faceless%20channel» до 2026-09
+[04:41:18]     неудача (Timeout. Maybe slow down a bit) → пауза 17с
+[04:41:44]     неудача (Timeout. Maybe slow down a bit) → пауза 27с
+[04:42:21]     неудача (Timeout. Maybe slow down a bit) → пауза 33с
+[04:42:54]     ⚠ отказ, пропускаю этот запрос
+[04:42:54]   comm r/VideoEditing «faceless%20video» до 2026-09
+[04:43:03]     неудача (Timeout. Maybe slow down a bit) → пауза 15с
+[04:43:27]     неудача (Timeout. Maybe slow down a bit) → пауза 26с
+[04:44:01]     неудача (Timeout. Maybe slow down a bit) → пауза 34с
+[04:44:35]     ⚠ отказ, пропускаю этот запрос
+[04:44:35]   comm r/VideoEditing «ai%20youtube%20cha» до 2026-09
+[04:44:43]     неудача (Timeout. Maybe slow down a bit) → пауза 16с
+[04:45:08]     неудача (Timeout. Maybe slow down a bit) → пауза 26с
+[04:45:44]     неудача (Timeout. Maybe slow down a bit) → пауза 34с

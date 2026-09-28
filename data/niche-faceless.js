@@ -92,6 +92,23 @@ window.NICHES = {
       { id: 'a2', branch: 'authentic', text: 'Мы не продаём мечту, мы продаём цифры',
         type: 'candor', claimPower: 6, n: 0,
         sources: [], objection: 'Тогда покажи цифры — сейчас их нет' },
+      // ═══ ПРАВИЛА ПЛАТФОРМЫ (потолок доказательства 10 — справка YouTube) ═══
+      { id: 'n1', branch: 'rules', text: 'AI-персоны в финансах, праве, здоровье и политике монетизировать нельзя',
+        type: 'platform_docs', claimPower: 6, n: 1,
+        sources: [{ name: 'YouTube Help 1311392', url: 'https://support.google.com/youtube/answer/1311392' }],
+        objection: 'Прямое пересечение с самыми доходными нишами ($15-50 CPM). Либо ниша, либо формат' },
+      { id: 'n2', branch: 'rules', text: 'Массовый шаблонный контент монетизации лишён',
+        type: 'platform_docs', claimPower: 6, n: 1,
+        sources: [{ name: 'YouTube Help 1311392', url: 'https://support.google.com/youtube/answer/1311392' }],
+        objection: 'Слайд-шоу и шаблоны перечислены прямо в запрещённых' },
+      { id: 'n3', branch: 'rules', text: 'Проверка идёт по 30 последним видео канала целиком',
+        type: 'named_press', claimPower: 5, n: 1,
+        sources: [{ name: 'TNW, январь 2026', url: 'https://thenextweb.com/news/youtube-ai-slop-crackdown-faceless-creators-collateral-damage' }],
+        objection: 'Один паттерн в 30 роликах снимает монетизацию со всего канала' },
+      { id: 'n4', branch: 'rules', text: 'YouTube платит 55% от Watch Page, 45% от Shorts, 70% от фан-фандинга',
+        type: 'platform_docs', claimPower: 5, n: 1,
+        sources: [{ name: 'YouTube Help 72902', url: 'https://support.google.com/youtube/answer/72902' }],
+        objection: 'Формула механики, не доказательство дохода' }
     ],
   },
 };
