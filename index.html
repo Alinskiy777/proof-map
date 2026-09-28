@@ -36,6 +36,32 @@
   .v-ok{background:#0f2c1c;border:1px solid #1d5c39;color:#b6f0cf}
   .obj{color:var(--dim);font-size:13px;margin-top:8px;font-style:italic}
   .close{position:absolute;top:12px;right:20px;cursor:pointer;color:var(--dim);font-size:22px}
+
+  /* ── экран «Пробелы» ── */
+  #gaps{display:none;padding:0 20px 30px}
+  #gaps.on{display:block}
+  .gap{border:1px solid var(--line);border-radius:12px;background:var(--card);
+       padding:13px 15px;margin-bottom:10px;position:relative;overflow:hidden}
+  .gap::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--risk)}
+  .gap h4{margin:0 0 5px;font-size:14.5px;font-weight:600;padding-right:120px}
+  .gap .why{color:#ffb4c6;font-size:12.5px;margin-bottom:8px}
+  .gap .meta{color:var(--dim);font-size:12px;margin-bottom:9px}
+  .risk-badge{position:absolute;top:13px;right:15px;background:#3b1520;color:#ffc9d6;
+              border:1px solid #7f1d3a;border-radius:20px;padding:2px 9px;font-size:11.5px}
+  .src-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .src-row input{flex:1;min-width:190px;background:#0d1426;border:1px solid var(--line);
+                 color:var(--fg);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit}
+  .src-row input:focus{outline:none;border-color:#3b82f6}
+  .btn{background:#1e3a8a;color:#dbeafe;border:1px solid #2b4a9e;border-radius:8px;
+       padding:7px 13px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .btn:hover{background:#2547a8}
+  .chip{font-size:11.5px;background:#16233d;border:1px solid var(--line);
+        border-radius:6px;padding:3px 8px;color:#a9c7ff}
+  .done-note{color:#8ee0b0;font-size:12px;margin-top:6px}
+  .tabs{display:flex;gap:8px;padding:0 20px 12px}
+  .tab{background:var(--card);border:1px solid var(--line);border-radius:9px;
+       padding:7px 15px;font-size:13px;cursor:pointer;color:var(--dim)}
+  .tab.on{color:var(--fg);border-color:#3b82f6;background:#14213f}
 </style>
 </head>
 <body>
@@ -50,7 +76,12 @@
   <div class="lg"><span class="dot" style="background:#ef4444"></span>дыра</div>
   <div class="lg">размер = сила доказательства · нажми на вершину</div>
 </div>
+<div class="tabs">
+  <div class="tab on" id="tabMap" onclick="go('map')">Карта</div>
+  <div class="tab" id="tabGaps" onclick="go('gaps')">Пробелы <b id="gapCount"></b></div>
+</div>
 <svg id="map" viewBox="0 0 1000 720"></svg>
+<div id="gaps"></div>
 <div id="panel"><span class="close" onclick="hide()">×</span><div id="pbody"></div></div>
 
 <script src="data/engine.js"></script>
@@ -62,20 +93,6 @@ const N = NICHES.faceless_youtube.claims;
 // ── раскладка: 8 ветвей по кольцу, вершины дугой вокруг центра ──
 const CX=500, CY=350, R=250;
 const branches = Object.keys(TAXONOMY);
-const byB = {}; branches.forEach(b => byB[b]=[]);
-N.forEach(c => byB[c.branch].push(c));
-
-const pos = {};   // id -> {x,y}
-branches.forEach((b,bi)=>{
-  const a = -Math.PI/2 + bi*(2*Math.PI/branches.length);
-  const bx = CX + Math.cos(a)*R*0.62, by = CY + Math.sin(a)*R*0.62;
-  const list = byB[b];
-  const spread = Math.min(1.15, list.length*0.16);
-  list.forEach((c,ci)=>{
-    const aa = a - spread/2 + (list.length>1 ? spread*ci/(list.length-1) : spread/2);
-    pos[c.id] = { x: CX + Math.cos(aa)*R, y: CY + Math.sin(aa)*R, bx, by, b };
-  });
-});
 
 function statusOf(c){
   const a = auditClaim(c);
@@ -85,11 +102,30 @@ function statusOf(c){
 }
 
 const esc = s => String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+const esc2 = s => String(s).replace(/[&<>"]/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+function drawMap(claims){
+const byB2 = {}; branches.forEach(b => byB2[b]=[]);
+claims.forEach(c => (byB2[c.branch]||byB2.market).push(c));
+const pos = {};   // id -> {x,y}
+branches.forEach((b,bi)=>{
+  const a = -Math.PI/2 + bi*(2*Math.PI/branches.length);
+  const bx = CX + Math.cos(a)*R*0.62, by = CY + Math.sin(a)*R*0.62;
+  const list = byB2[b];
+  const spread = Math.min(1.15, list.length*0.16);
+  list.forEach((c,ci)=>{
+    const aa = a - spread/2 + (list.length>1 ? spread*ci/(list.length-1) : spread/2);
+    pos[c.id] = { x: CX + Math.cos(aa)*R, y: CY + Math.sin(aa)*R, bx, by, b };
+  });
+});
+
+
 
 // ── рисуем ──
 let svg = '';
 branches.forEach(b=>{
-  const list = byB[b]; if(!list.length) return;
+  const list = byB2[b]; if(!list.length) return;
   const p = pos[list[0].id];
   svg += `<line x1="${CX}" y1="${CY}" x2="${p.bx.toFixed(1)}" y2="${p.by.toFixed(1)}"
             stroke="${TAXONOMY[b].color}" stroke-width="2" opacity=".38"/>`;
@@ -100,7 +136,7 @@ branches.forEach(b=>{
             fill="#8b93ab" font-size="10">${list.length}</text>`;
 });
 branches.forEach(b=>{
-  byB[b].forEach(c=>{
+  byB2[b].forEach(c=>{
     const p = pos[c.id], st = statusOf(c);
     const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
     const r = 7 + w*1.5;
@@ -114,6 +150,8 @@ branches.forEach(b=>{
   });
 });
 document.getElementById('map').innerHTML = svg;
+}   // end drawMap
+drawMap(N);
 
 // ── статистика ──
 const st = N.map(statusOf);
@@ -147,6 +185,104 @@ function show(id){
   document.getElementById('panel').classList.add('on');
 }
 function hide(){ document.getElementById('panel').classList.remove('on'); }
+
+// ═══ ЭКРАН «ПРОБЕЛЫ» ═══
+// Главный экран приложения: что НЕ доказано, отсортировано по риску.
+// Добавленные источники живут в localStorage — дыра закрывается руками.
+const LS = 'proofmap.sources.v1';
+function loadAdded(){
+  try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch(e){ return {}; }
+}
+function saveAdded(m){ try { localStorage.setItem(LS, JSON.stringify(m)); } catch(e){} }
+
+function merged(){
+  const added = loadAdded();
+  return N.map(c => {
+    const a = added[c.id];
+    if (!a || !a.length) return c;
+    return Object.assign({}, c, {sources: (c.sources||[]).concat(a)});
+  });
+}
+
+function go(screen){
+  document.getElementById('tabMap').classList.toggle('on', screen==='map');
+  document.getElementById('tabGaps').classList.toggle('on', screen==='gaps');
+  document.getElementById('map').style.display  = screen==='map' ? 'block' : 'none';
+  document.getElementById('gaps').classList.toggle('on', screen==='gaps');
+  if (screen==='gaps') renderGaps();
+}
+
+function renderGaps(){
+  const list = merged().map(c => ({c, r: riskOf(c), a: auditClaim(c)}))
+                        .filter(x => !(x.a.ok && !x.a.warn))
+                        .sort((x, y) => y.r - x.r);
+  document.getElementById('gapCount').textContent = list.length;
+  document.getElementById('gaps').innerHTML =
+    list.length === 0
+      ? '<div class="stat" style="display:inline-block">✅ Дыр нет. Все утверждения держатся доказательствами.</div>'
+      : list.map(x => {
+        const c = x.c, w = STRENGTH[c.type] || {w:3, name:c.type};
+        const col = x.r >= 9 ? '#ef4444' : x.r >= 6 ? '#f97316' : '#eab308';
+        const srcs = (c.sources||[]).map(s =>
+          `<span class="chip">${esc2(s.name)}${s.n?' · n='+s.n:' · n не указан'}</span>`).join(' ');
+        return `<div class="gap" style="--risk:${col}">
+          <div class="risk-badge">риск ${x.r}</div>
+          <h4>${esc2(c.text)}</h4>
+          <div class="why">${x.a.ok ? '⚠ '+esc2(x.a.warn) : '❌ '+esc2(x.a.msg)}</div>
+          <div class="meta">${esc2(TAXONOMY[c.branch].name)} · ${esc2(w.name)}
+            · сила доказательства ${w.w}/10 · сила утверждения ${c.claimPower}/10</div>
+          <div>${srcs || '<span class="chip" style="color:#ffb4c6;border-color:#7f1d3a">источников нет</span>'}</div>
+          <div class="src-row" style="margin-top:9px">
+            <input id="in_${c.id}" placeholder="добавить источник: что именно доказывает">
+            <div class="btn" onclick="addSrc('${c.id}')">закрыть дыру</div>
+          </div>
+          ${c.objection ? `<div class="obj">Возражение: ${esc2(c.objection)}</div>` : ''}
+          <div id="ok_${c.id}"></div>
+        </div>`;
+      }).join('');
+}
+
+function addSrc(id){
+  const el = document.getElementById('in_' + id);
+  const v = (el.value || '').trim();
+  if (!v) return;
+  const m = loadAdded(); (m[id] = m[id] || []).push({name: v, n: null});
+  saveAdded(m);
+  el.value = '';
+  renderGaps();
+  repaint();
+  // 🔴 Честно: источник не равен закрытой дыре. Если утверждение всё ещё
+  // громче доказательства — дыра останется, и сказать «✓» было бы враньём.
+  const c = merged().find(x => x.id === id);
+  const a = auditClaim(c);
+  const box = document.getElementById('ok_' + id);
+  if (!box) return;
+  box.innerHTML = (!a.ok)
+    ? '<div class="done-note" style="color:#ffb4c6">✗ Источник добавлен, но дыра НЕ закрыта: ' + esc2(a.msg) + '</div>'
+    : a.warn
+      ? '<div class="done-note" style="color:#ffe0a3">△ Источник добавлен, осталось: ' + esc2(a.warn) + '</div>'
+      : '<div class="done-note">✓ Источник добавлен — дыра закрыта</div>';
+}
+
+function refreshStats(){
+  const list = merged();
+  const s2 = list.map(c => { const a = auditClaim(c);
+    return !a.ok ? 'bad' : a.warn ? 'warn' : 'ok'; });
+  const cnt = k => s2.filter(x => x === k).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><b style="color:#22c55e">${cnt('ok')}</b>доказано</div>
+    <div class="stat"><b style="color:#eab308">${cnt('warn')}</b>частично</div>
+    <div class="stat"><b style="color:#ef4444">${cnt('bad')}</b>дыр</div>
+    <div class="stat"><b>${Math.round(cnt('ok')/list.length*100)}%</b>покрыто доказательствами</div>`;
+}
+
+// пересчёт после добавления источника: карта и статистика должны честно меняться
+function repaint(){
+  drawMap(merged());
+  refreshStats();
+}
+
+renderGaps();
 </script>
 </body>
 </html>

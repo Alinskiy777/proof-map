@@ -53,6 +53,18 @@ function auditClaim(c) {
   return { ok: true };
 }
 
-window.ProofMap = { TAXONOMY, STRENGTH, auditClaim };
+/** Риск дыры: насколько утверждение «выше» доказательства + насколько оно громкое.
+ *  0 — дыры нет. Больше — опаснее. Сортировка «Пробелов» идёт по нему. */
+function riskOf(c) {
+  const a = auditClaim(c);
+  if (a.ok && !a.warn) return 0;
+  const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
+  const overclaim = Math.max(0, (c.claimPower || 5) - w);   // голос выше доказательства
+  const hollow   = (!c.sources || !c.sources.length) ? 3 : 0; // голословное вообще
+  const noN      = (c.sources || []).some(s => s.n === undefined || s.n === null) ? 1 : 0;
+  return overclaim * 2 + hollow * 2 + noN;
+}
+
+window.ProofMap = { TAXONOMY, STRENGTH, auditClaim, riskOf };
 if (typeof module !== 'undefined') module.exports = window.ProofMap;
 })();

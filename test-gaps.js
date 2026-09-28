@@ -1,0 +1,51 @@
+const fs=require('fs'),H=process.env.HOME;
+const store={},nodes={};
+function mk(id){return {id,_h:'',_t:'',classList:{cls:new Set(),
+  add(c){this.cls.add(c)},remove(c){this.cls.delete(c)},toggle(c,v){v?this.cls.add(c):this.cls.delete(c)},contains(c){return this.cls.has(c)}},
+  set innerHTML(v){this._h=String(v)}, get innerHTML(){return this._h},
+  set textContent(v){this._t=String(v)}, get textContent(){return this._t},
+  style:{}, value:''};}
+global.document={getElementById(id){if(!nodes[id])nodes[id]=mk(id);return nodes[id]}};
+global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>{store[k]=v},removeItem:k=>{delete store[k]}};
+const w={};global.window=w;
+const R=p=>eval(fs.readFileSync(p,'utf8'));
+R(H+'/proof-map/data/engine.js'.replace('if (typeof module','if (0&&typeof module'));
+R(H+'/proof-map/data/niche-faceless.js');
+global.ProofMap=w.ProofMap; global.NICHES=w.NICHES; global.riskOf=w.ProofMap.riskOf;
+const h=fs.readFileSync(H+'/proof-map/index.html','utf8');
+eval(h.split('<script>')[1].split('</'+'script>')[0]);
+let fail=0; const ok=(c,m)=>{console.log('  '+(c?'✅':'❌')+' '+m); if(!c)fail++;};
+console.log('═══ ТЕСТ ЭКРАНА «ПРОБЕЛЫ» ═══');
+ok(!!document.getElementById('tabMap')&&!!document.getElementById('tabGaps'),'две вкладки на месте');
+const cards=(nodes.gaps.innerHTML.match(/class="gap"/g)||[]).length;
+ok(cards>0, 'карточек пробелов: '+cards+' (счётчик в шапке: '+nodes.gapCount.textContent+')');
+const risks=[...nodes.gaps.innerHTML.matchAll(/риск (\d+)/g)].map(m=>+m[1]);
+ok(risks.every((r,i)=>i===0||risks[i-1]>=r), 'сортировка по риску убывает: '+risks.slice(0,6).join(','));
+ok(nodes.gaps.innerHTML.includes('закрыть дыру'),'кнопка «закрыть дыру» есть');
+ok(nodes.gaps.innerHTML.includes('возражение')||nodes.gaps.innerHTML.includes('Возражение'),'возражения показаны');
+const before=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+document.getElementById('in_e1').value='медианы по 40 каналам 2024-2026, n=40';
+addSrc('e1');
+const after=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+ok(JSON.parse(store['proofmap.sources.v1']).e1.length===1,'источник сохранён в localStorage');
+ok(nodes.gaps.innerHTML.includes('медианы по 40 каналам'),'источник виден в карточке');
+ok(nodes.gaps.innerHTML.includes('n не указан'),'н честно помечен как отсутствующий');
+ok(before===after,'статистика НЕ изменилась: источник не закрывает дыру, где голос выше доказательства');
+const box=document.getElementById('ok_e1').innerHTML;
+ok(box.includes('НЕ закрыта')&&box.includes('сильнее доказательства'),'UI честно говорит, что дыра осталась: '+box.replace(/<[^>]+>/g,'').slice(0,60));
+// обратный случай: слабое утверждение + источник перестаёт быть дырой
+const stat0=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+document.getElementById('in_a1').value='политика канала: disclosure AI-контента';
+addSrc('a1');
+const stat1=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+ok(stat0!==stat1,'слабое утверждение + источник меняет статистику');
+ok(stat1.includes('1 частично'),'статус «частично» честный: '+stat1);
+ok(stat0.includes('22 дыр')&&stat1.includes('21 дыр'),'дыра перешла в «частично»: 22 → 21');
+ok(nodes.gaps.innerHTML.includes('n не указан'),'отсутствие n показано честно');
+ok(nodes.gaps.innerHTML.includes('in_a1'),'частичное остаётся в списке — его можно докрутить');
+ok((nodes.map.innerHTML.match(/class="node"/g)||[]).length===23,'карта перерисована, 23 вершины');
+go('gaps');
+ok(nodes.map.style.display==='none','переключение на «Пробелы» прячет карту');
+go('map');
+ok(nodes.map.style.display!=='none','переключение обратно возвращает карту');
+console.log('\n'+(fail?('❌ провалено: '+fail):'✅ ВСЁ ЗЕЛЁНОЕ'));
