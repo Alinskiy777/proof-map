@@ -115,6 +115,7 @@
 <script src="data/engine.js"></script>
 <script src="data/niche-faceless.js"></script>
 <script src="data/objections-faceless.js"></script>
+<script src="data/competitor-proof.js"></script>
 <script>
 const {TAXONOMY, STRENGTH, auditClaim} = ProofMap;
 const N = NICHES.faceless_youtube.claims;
@@ -347,6 +348,17 @@ function addSrc(id){
   // 🔴 Честно: источник не равен закрытой дыре. Если утверждение всё ещё
   // громче доказательства — дыра останется, и сказать «✓» было бы враньём.
   verdictNote(id);
+  // Явный вердикт по самому действию «добавил источник» — три честных состояния.
+  const vc = merged().find(x => x.id === id);
+  const va = vc ? auditClaim(vc) : null;
+  const vbox = document.getElementById('ok_' + id);
+  if (va && vbox){
+    vbox.innerHTML = (!va.ok)
+      ? '<div class="done-note" style="color:#ffb4c6">✗ Источник добавлен, но дыра НЕ закрыта: ' + esc2(va.msg || 'голос выше доказательства') + '</div>'
+      : va.warn
+        ? '<div class="done-note" style="color:#ffe0a3">△ Источник добавлен, но осталось: ' + esc2(va.warn) + '</div>'
+        : '<div class="done-note">✓ Источник добавлен — дыра закрыта</div>';
+  }
 }
 
 // ── ПОЛЗУНОК СИЛЫ УТВЕРЖДЕНИЯ ──
