@@ -59,6 +59,18 @@
         border-radius:6px;padding:3px 8px;color:#a9c7ff}
   .done-note{color:#8ee0b0;font-size:12px;margin-top:6px}
   .tabs{display:flex;gap:8px;padding:0 20px 12px}
+  /* ── ползунок силы утверждения ── */
+  .slider-row{display:flex;align-items:center;gap:10px;margin-top:10px;
+              padding-top:9px;border-top:1px dashed var(--line);flex-wrap:wrap}
+  .slider-row label{color:var(--dim);font-size:12.5px;white-space:nowrap}
+  .slider-row input[type=range]{flex:1;min-width:130px;accent-color:#3b82f6;cursor:pointer}
+  .claim-val{font-weight:700;font-size:13px;min-width:22px;text-align:center;
+             color:#9ec5ff;font-variant-numeric:tabular-nums}
+  .sr-btn{background:#3b1520;color:#ffc9d6;border:1px solid #7f1d3a;border-radius:8px;
+          padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+  .sr-btn:hover{background:#4d1a29}
+  .sr-note{color:var(--dim);font-size:11.5px;flex-basis:100%;margin-top:2px}
+  .sr-good{color:#8ee0b0}
   .tab{background:var(--card);border:1px solid var(--line);border-radius:9px;
        padding:7px 15px;font-size:13px;cursor:pointer;color:var(--dim)}
   .tab.on{color:var(--fg);border-color:#3b82f6;background:#14213f}
@@ -196,11 +208,16 @@ function loadAdded(){
 function saveAdded(m){ try { localStorage.setItem(LS, JSON.stringify(m)); } catch(e){} }
 
 function merged(){
+  // Учитываем оба честных пути: добавленные источники И изменённый голос.
+  // Всё, что не трогали, остаётся как в источнике — никаких выдумок.
   const added = loadAdded();
+  const cl = loadClaims();
   return N.map(c => {
+    let out = c;
+    if (cl[c.id] !== undefined) out = Object.assign({}, out, {claimPower: cl[c.id]});
     const a = added[c.id];
-    if (!a || !a.length) return c;
-    return Object.assign({}, c, {sources: (c.sources||[]).concat(a)});
+    if (a && a.length) out = Object.assign({}, out, {sources: (c.sources||[]).concat(a)});
+    return out;
   });
 }
 
@@ -230,16 +247,25 @@ function renderGaps(){
           <h4>${esc2(c.text)}</h4>
           <div class="why">${x.a.ok ? '⚠ '+esc2(x.a.warn) : '❌ '+esc2(x.a.msg)}</div>
           <div class="meta">${esc2(TAXONOMY[c.branch].name)} · ${esc2(w.name)}
-            · сила доказательства ${w.w}/10 · сила утверждения ${c.claimPower}/10</div>
+            · сила доказательства ${w.w}/10 · сила утверждения ${claimOf(c)}/10</div>
           <div>${srcs || '<span class="chip" style="color:#ffb4c6;border-color:#7f1d3a">источников нет</span>'}</div>
           <div class="src-row" style="margin-top:9px">
             <input id="in_${c.id}" placeholder="добавить источник: что именно доказывает">
             <div class="btn" onclick="addSrc('${c.id}')">закрыть дыру</div>
           </div>
+          <div class="slider-row">
+            <label>сила утверждения</label>
+            <input type="range" min="1" max="10" value="${claimOf(c)}" id="sl_${c.id}"
+                   oninput="setClaim('${c.id}', this.value)">
+            <div class="claim-val" id="cv_${c.id}">${claimOf(c)}</div>
+            <div class="sr-btn" onclick="lowerClaim('${c.id}')">приравнять к доказательству</div>
+            <div class="sr-note" id="sn_${c.id}"></div>
+          </div>
           ${c.objection ? `<div class="obj">Возражение: ${esc2(c.objection)}</div>` : ''}
           <div id="ok_${c.id}"></div>
         </div>`;
       }).join('');
+  list.forEach(x => verdictNote(x.c.id));   // подписи под ползунками — сразу
 }
 
 function addSrc(id){
@@ -253,15 +279,56 @@ function addSrc(id){
   repaint();
   // 🔴 Честно: источник не равен закрытой дыре. Если утверждение всё ещё
   // громче доказательства — дыра останется, и сказать «✓» было бы враньём.
+  verdictNote(id);
+}
+
+// ── ПОЛЗУНОК СИЛЫ УТВЕРЖДЕНИЯ ──
+// Бенчивенга: «never make your claim bigger than your proof».
+// Два честных пути закрыть дыру: поднять доказательство (источник) или
+// опустить голос (этот ползунок). Третьего нет — и приложение это показывает.
+const LC = 'proofmap.claims.v1';
+function loadClaims(){ try { return JSON.parse(localStorage.getItem(LC)) || {}; } catch(e){ return {}; } }
+function saveClaims(m){ try { localStorage.setItem(LC, JSON.stringify(m)); } catch(e){} }
+
+function claimOf(c){
+  const m = loadClaims();
+  return (m[c.id] !== undefined) ? m[c.id] : c.claimPower;
+}
+
+function setClaim(id, v){
+  const m = loadClaims(); m[id] = +v; saveClaims(m);
+  document.getElementById('cv_' + id).textContent = v;
+  // карта и статистика — по новому голосу
+  repaint();
+  verdictNote(id);
+}
+
+function lowerClaim(id){
   const c = merged().find(x => x.id === id);
+  if (!c) return;
+  const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
+  setClaim(id, w);                 // ровно по доказательству — не ниже
+}
+
+function verdictNote(id){
+  const c = merged().find(x => x.id === id);
+  if (!c) return;
   const a = auditClaim(c);
-  const box = document.getElementById('ok_' + id);
-  if (!box) return;
-  box.innerHTML = (!a.ok)
-    ? '<div class="done-note" style="color:#ffb4c6">✗ Источник добавлен, но дыра НЕ закрыта: ' + esc2(a.msg) + '</div>'
-    : a.warn
-      ? '<div class="done-note" style="color:#ffe0a3">△ Источник добавлен, осталось: ' + esc2(a.warn) + '</div>'
-      : '<div class="done-note">✓ Источник добавлен — дыра закрыта</div>';
+  const note = document.getElementById('sn_' + id);
+  if (!note) return;
+  const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
+  const cp = claimOf(c);
+  let html;
+  if (!a.ok){
+    const d = cp - w;
+    html = '<span style="color:#ffb4c6">голос на ' + d + ' выше доказательства — '
+         + '«Yeah, sure». Опустить до ' + w + ' или собрать доказательства силы ' + cp + '.</span>';
+  } else if (a.warn){
+    html = '<span style="color:#ffe0a3">' + esc2(a.warn) + '</span>';
+  } else {
+    html = '<span class="sr-good">✓ дыры нет: голос ' + cp + ' ≤ доказательства ' + w + '</span>';
+  }
+  note.innerHTML = html;
 }
 
 function refreshStats(){

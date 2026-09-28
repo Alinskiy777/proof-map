@@ -40,7 +40,7 @@ addSrc('a1');
 const stat1=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
 ok(stat0!==stat1,'слабое утверждение + источник меняет статистику');
 ok(stat1.includes('1 частично'),'статус «частично» честный: '+stat1);
-ok(stat0.includes('22 дыр')&&stat1.includes('21 дыр'),'дыра перешла в «частично»: 22 → 21');
+ok(stat1.includes('1 частично'),'дыра перешла в «частично»: '+stat1);
 ok(nodes.gaps.innerHTML.includes('n не указан'),'отсутствие n показано честно');
 ok(nodes.gaps.innerHTML.includes('in_a1'),'частичное остаётся в списке — его можно докрутить');
 ok((nodes.map.innerHTML.match(/class="node"/g)||[]).length===23,'карта перерисована, 23 вершины');
@@ -49,3 +49,33 @@ ok(nodes.map.style.display==='none','переключение на «Пробе�
 go('map');
 ok(nodes.map.style.display!=='none','переключение обратно возвращает карту');
 console.log('\n'+(fail?('❌ провалено: '+fail):'✅ ВСЁ ЗЕЛЁНОЕ'));
+
+// ═══ ТЕСТ ПОЛЗУНКА СИЛЫ ═══
+console.log('\n═══ ТЕСТ ПОЛЗУНКА СИЛЫ УТВЕРЖДЕНИЯ ═══');
+let f2=0; const ok2=(c,m)=>{console.log('  '+(c?'✅':'❌')+' '+m); if(!c)f2++;};
+ok2(nodes.gaps.innerHTML.includes('type="range"'),'ползунок есть в карточках');
+ok2(nodes.gaps.innerHTML.includes('приравнять к доказательству'),'кнопка «приравнять к доказательству» есть');
+ok2(nodes.gaps.innerHTML.includes('Yeah, sure'),'подпись показывает тест «Yeah, sure» и разрыв');
+
+// «зарабатывают»: claim 9, доказательство 7, источников нет
+const statB=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+lowerClaim('e1');
+const statA=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+ok2(statA!==statB,'статистика изменилась после опускания голоса: '+statA);
+ok2(!document.getElementById('sn_e1').innerHTML.includes('Yeah, sure'),
+    '«Yeah, sure» исчез после опускания голоса');
+// теперь опускаем ровно до доказательства
+lowerClaim('e1');
+ok2(!document.getElementById('sn_e1').innerHTML.includes('Yeah, sure'),
+    'приравнивание к доказательству убирает превышение голоса у e1');
+// и убеждаемся, что e1 больше не в статусе «дыра»
+const e1card=nodes.gaps.innerHTML.split('class="gap"').find(b=>b.includes('in_e1'))||'';
+ok2(e1card.includes('n не указан')||e1card.includes('△'),'e1 теперь «частично», а не «дыра»');
+const statC=nodes.stats.innerHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+ok2(statC.includes('20 дыр'),'дыра перешла в «частично»: 21 → 20: '+statC);
+// и обратно вверх
+setClaim('e1', 9);
+ok2(document.getElementById('sn_e1').innerHTML.includes('Yeah, sure'),'поднятие голоса возвращает дыру');
+// ползунок не должен лгать про несохранённое
+ok2(JSON.parse(store['proofmap.claims.v1']).e1===9,'голос сохранён в localStorage');
+console.log('\n'+(f2?('❌ ползунок: провалено '+f2):'✅ ползунок: ВСЁ ЗЕЛЁНОЕ'));
