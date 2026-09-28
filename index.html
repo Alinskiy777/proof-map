@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Карта доказательств</title>
+<style>
+  :root{--bg:#0b1020;--fg:#e8eaf2;--dim:#8b93ab;--card:#141b31;--line:#26304d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:16px 20px 8px;border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:19px;font-weight:650;letter-spacing:-.2px}
+  .sub{color:var(--dim);font-size:13px;margin-top:4px}
+  .bar{display:flex;gap:10px;padding:12px 20px;flex-wrap:wrap;align-items:center}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:8px 12px;font-size:12.5px}
+  .stat b{font-size:17px;display:block}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;padding:0 20px 12px;font-size:12px;color:var(--dim)}
+  .lg{display:flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:50%}
+  #map{width:100%;height:auto;display:block;padding:0 10px 20px}
+  .node{cursor:pointer}
+  .node:hover circle{stroke:#fff;stroke-width:2}
+  #panel{position:fixed;inset:auto 0 0 0;background:var(--card);
+         border-top:1px solid var(--line);padding:16px 20px;display:none;
+         max-height:52vh;overflow:auto}
+  #panel.on{display:block}
+  #panel h3{margin:0 0 6px;font-size:16px}
+  #panel .meta{color:var(--dim);font-size:12.5px;margin-bottom:10px}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;margin:2px 4px 2px 0}
+  .verdict{padding:9px 12px;border-radius:8px;font-size:13.5px;margin:10px 0}
+  .v-bad{background:#3b1520;border:1px solid #7f1d3a;color:#ffc9d6}
+  .v-warn{background:#33280f;border:1px solid #78551a;color:#ffe0a3}
+  .v-ok{background:#0f2c1c;border:1px solid #1d5c39;color:#b6f0cf}
+  .obj{color:var(--dim);font-size:13px;margin-top:8px;font-style:italic}
+  .close{position:absolute;top:12px;right:20px;cursor:pointer;color:var(--dim);font-size:22px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Карта доказательств</h1>
+  <div class="sub" id="subtitle">загрузка…</div>
+</header>
+<div class="bar" id="stats"></div>
+<div class="legend">
+  <div class="lg"><span class="dot" style="background:#22c55e"></span>доказано</div>
+  <div class="lg"><span class="dot" style="background:#eab308"></span>частично / без n</div>
+  <div class="lg"><span class="dot" style="background:#ef4444"></span>дыра</div>
+  <div class="lg">размер = сила доказательства · нажми на вершину</div>
+</div>
+<svg id="map" viewBox="0 0 1000 720"></svg>
+<div id="panel"><span class="close" onclick="hide()">×</span><div id="pbody"></div></div>
+
+<script src="data/engine.js"></script>
+<script src="data/niche-faceless.js"></script>
+<script>
+const {TAXONOMY, STRENGTH, auditClaim} = ProofMap;
+const N = NICHES.faceless_youtube.claims;
+
+// ── раскладка: 8 ветвей по кольцу, вершины дугой вокруг центра ──
+const CX=500, CY=350, R=250;
+const branches = Object.keys(TAXONOMY);
+const byB = {}; branches.forEach(b => byB[b]=[]);
+N.forEach(c => byB[c.branch].push(c));
+
+const pos = {};   // id -> {x,y}
+branches.forEach((b,bi)=>{
+  const a = -Math.PI/2 + bi*(2*Math.PI/branches.length);
+  const bx = CX + Math.cos(a)*R*0.62, by = CY + Math.sin(a)*R*0.62;
+  const list = byB[b];
+  const spread = Math.min(1.15, list.length*0.16);
+  list.forEach((c,ci)=>{
+    const aa = a - spread/2 + (list.length>1 ? spread*ci/(list.length-1) : spread/2);
+    pos[c.id] = { x: CX + Math.cos(aa)*R, y: CY + Math.sin(aa)*R, bx, by, b };
+  });
+});
+
+function statusOf(c){
+  const a = auditClaim(c);
+  if (!a.ok) return {s:'bad', a};
+  if (a.warn) return {s:'warn', a};
+  return {s:'ok', a};
+}
+
+const esc = s => String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+
+// ── рисуем ──
+let svg = '';
+branches.forEach(b=>{
+  const list = byB[b]; if(!list.length) return;
+  const p = pos[list[0].id];
+  svg += `<line x1="${CX}" y1="${CY}" x2="${p.bx.toFixed(1)}" y2="${p.by.toFixed(1)}"
+            stroke="${TAXONOMY[b].color}" stroke-width="2" opacity=".38"/>`;
+  svg += `<circle cx="${p.bx.toFixed(1)}" cy="${p.by.toFixed(1)}" r="7" fill="${TAXONOMY[b].color}"/>`;
+  svg += `<text x="${p.bx.toFixed(1)}" y="${(p.by-13).toFixed(1)}" text-anchor="middle"
+            fill="${TAXONOMY[b].color}" font-size="12.5" font-weight="600">${esc(TAXONOMY[b].name)}</text>`;
+  svg += `<text x="${p.bx.toFixed(1)}" y="${(p.by+20).toFixed(1)}" text-anchor="middle"
+            fill="#8b93ab" font-size="10">${list.length}</text>`;
+});
+branches.forEach(b=>{
+  byB[b].forEach(c=>{
+    const p = pos[c.id], st = statusOf(c);
+    const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
+    const r = 7 + w*1.5;
+    const col = st.s==='ok' ? '#22c55e' : st.s==='warn' ? '#eab308' : '#ef4444';
+    svg += `<line x1="${p.bx.toFixed(1)}" y1="${p.by.toFixed(1)}" x2="${p.x.toFixed(1)}"
+             y2="${p.y.toFixed(1)}" stroke="#26304d" stroke-width="1"/>`;
+    svg += `<g class="node" onclick="show('${c.id}')">
+      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r.toFixed(1)}"
+              fill="${col}" opacity="${(0.18+w*0.06).toFixed(2)}" stroke="${col}" stroke-width="1.5"/>
+    </g>`;
+  });
+});
+document.getElementById('map').innerHTML = svg;
+
+// ── статистика ──
+const st = N.map(statusOf);
+const cnt = k => st.filter(x=>x.s===k).length;
+document.getElementById('subtitle').textContent =
+  NICHES.faceless_youtube.name + ' · ' + N.length + ' утверждений';
+document.getElementById('stats').innerHTML = `
+  <div class="stat"><b style="color:#22c55e">${cnt('ok')}</b>доказано</div>
+  <div class="stat"><b style="color:#eab308">${cnt('warn')}</b>частично</div>
+  <div class="stat"><b style="color:#ef4444">${cnt('bad')}</b>дыр</div>
+  <div class="stat"><b>${Math.round(cnt('ok')/N.length*100)}%</b>покрыто доказательствами</div>`;
+
+// ── панель вершины ──
+function show(id){
+  const c = N.find(x=>x.id===id); if(!c) return;
+  const stt = statusOf(c), w = STRENGTH[c.type]||{w:3,name:c.type};
+  const a = stt.a;
+  const verdict = !a.ok ? `<div class="verdict v-bad">❌ ${esc(a.msg)}</div>`
+    : a.warn ? `<div class="verdict v-warn">⚠ ${esc(a.warn)}</div>`
+    : `<div class="verdict v-ok">✅ Доказательство держит утверждение</div>`;
+  const srcs = (c.sources&&c.sources.length)
+    ? c.sources.map(s=>`<span class="tag" style="background:#1b2c47;color:#a9c7ff">${esc(s.name)}${s.n?` · n=${s.n}`:' · n не указан'}</span>`).join('')
+    : `<span class="tag" style="background:#3b1520;color:#ffc9d6">источников нет</span>`;
+  document.getElementById('pbody').innerHTML = `
+    <h3>${esc(c.text)}</h3>
+    <div class="meta">Ветвь: ${esc(TAXONOMY[c.branch].name)} · тип: ${esc(w.name)} ·
+         сила доказательства ${w.w}/10 · сила утверждения ${c.claimPower}/10</div>
+    ${verdict}
+    <div>${srcs}</div>
+    ${c.objection?`<div class="obj">Возражение: ${esc(c.objection)}</div>`:''}`;
+  document.getElementById('panel').classList.add('on');
+}
+function hide(){ document.getElementById('panel').classList.remove('on'); }
+</script>
+</body>
+</html>
