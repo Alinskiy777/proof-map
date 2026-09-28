@@ -11,7 +11,10 @@ const w={};global.window=w;
 const R=p=>eval(fs.readFileSync(p,'utf8'));
 R(H+'/proof-map/data/engine.js'.replace('if (typeof module','if (0&&typeof module'));
 R(H+'/proof-map/data/niche-faceless.js');
+R(H+'/proof-map/data/objections-faceless.js');
 global.ProofMap=w.ProofMap; global.NICHES=w.NICHES; global.riskOf=w.ProofMap.riskOf;
+global.OBJECTIONS=w.OBJECTIONS;
+global.objectionLoad=w.ProofMap.objectionLoad; global.objectionsFor=w.ProofMap.objectionsFor;
 const h=fs.readFileSync(H+'/proof-map/index.html','utf8');
 eval(h.split('<script>')[1].split('</'+'script>')[0]);
 let fail=0; const ok=(c,m)=>{console.log('  '+(c?'✅':'❌')+' '+m); if(!c)fail++;};
@@ -79,3 +82,34 @@ ok2(document.getElementById('sn_e1').innerHTML.includes('Yeah, sure'),'подн�
 // ползунок не должен лгать про несохранённое
 ok2(JSON.parse(store['proofmap.claims.v1']).e1===9,'голос сохранён в localStorage');
 console.log('\n'+(f2?('❌ ползунок: провалено '+f2):'✅ ползунок: ВСЁ ЗЕЛЁНОЕ'));
+
+// ═══ ТЕСТ МОСТА REDDIT ↔ ПРИЛОЖЕНИЕ ═══
+console.log('\n═══ МОСТ: ЖИВЫЕ ЛЮДИ ↔ КАРТА ═══');
+let f3=0; const ok3=(c,m)=>{console.log('  '+(c?'✅':'❌')+' '+m); if(!c)f3++;};
+ok3(typeof objectionsFor==='function','движок знает про возражения');
+ok3(w.OBJECTIONS && w.OBJECTIONS.clusters.length===10,'кластеров загружено: '+(w.OBJECTIONS?w.OBJECTIONS.clusters.length:0));
+// каждый кластер бьёт в существующие id
+const nicheIds=new Set(w.NICHES.faceless_youtube.claims.map(c=>c.id));
+let fake=0, nohit=0;
+w.OBJECTIONS.clusters.forEach(k=>{ if(!k.hits.length) nohit++;
+  k.hits.forEach(h=>{ if(!nicheIds.has(h)) fake++; }); });
+ok3(fake===0,'нет выдуманных id утверждений');
+ok3(nohit===0,'каждый кластер куда-то бьёт');
+// давление реальности ненулевое там, где кластеры есть
+ok3(objectionLoad('p1')>0,'«ИИ неотличимо от human» (p1) имеет давление: '+objectionLoad('p1'));
+ok3(objectionLoad('e1')>0,'«зарабатывают» (e1) имеет давление: '+objectionLoad('e1'));
+const zero=['m1','r3','w1'].filter(id=>objectionLoad(id)===0);
+ok3(zero.length===3,'эти 3 утверждения никто не оспаривал: '+zero.join(', '));
+// блок в карточке
+renderGaps();
+ok3(nodes.gaps.innerHTML.includes('что говорят живые люди'),'в карточках есть блок живых людей');
+ok3(nodes.gaps.innerHTML.includes('I despise AI slop'),'цитата в карточке (дословная)');
+ok3(!nodes.gaps.innerHTML.includes('push_m1"'),'для не оспариваемого утверждения блока нет');
+// вкладка
+ok3(!!document.getElementById('tabReal'),'вкладка «Живые люди» есть');
+go('real');
+ok3(nodes.real.innerHTML.includes('Источник:'),'вкладка отрисована с источником');
+ok3((nodes.real.innerHTML.match(/class="gap"/g)||[]).length===10,'10 кластеров во вкладке');
+// честность: оговорка про один сабреддит
+ok3(nodes.real.innerHTML.includes('один сабреддит'),'оговорка «один сабреддит» показана честно');
+console.log('\n'+(f3?('❌ мост: провалено '+f3):'✅ мост: ВСЁ ЗЕЛЁНОЕ'));

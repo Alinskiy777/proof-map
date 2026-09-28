@@ -74,20 +74,6 @@
   .tab{background:var(--card);border:1px solid var(--line);border-radius:9px;
        padding:7px 15px;font-size:13px;cursor:pointer;color:var(--dim)}
   .tab.on{color:var(--fg);border-color:#3b82f6;background:#14213f}
-  /* ── блок «живые люди» ── */
-  .push{margin-top:10px;border:1px solid #3d1f2e;background:#150d16;border-radius:10px;overflow:hidden}
-  .push-h{display:flex;justify-content:space-between;align-items:center;cursor:pointer;
-          padding:9px 12px;font-size:12.5px;color:#ffb4c6;user-select:none}
-  .push-h:hover{background:#1e1019}
-  .push-n{background:#7f1d3a;color:#ffd9e2;border-radius:14px;padding:1px 9px;font-size:11.5px}
-  .push-body{padding:0 12px 11px;display:none}
-  .push.open .push-body{display:block}
-  .k-cluster{margin-bottom:9px}
-  .k-name{color:#ffc9d6;font-size:12.5px;font-weight:600;margin-bottom:2px}
-  .k-meta{color:var(--dim);font-size:11px;margin-bottom:5px}
-  .q{border-left:2px solid #7f1d3a;padding:2px 0 2px 9px;margin-bottom:6px;
-     font-size:12.5px;color:#d9c9cf;font-style:italic}
-  .q .ref{color:#8a7a80;font-style:normal;font-size:11px}
 </style>
 </head>
 <body>
@@ -105,16 +91,13 @@
 <div class="tabs">
   <div class="tab on" id="tabMap" onclick="go('map')">Карта</div>
   <div class="tab" id="tabGaps" onclick="go('gaps')">Пробелы <b id="gapCount"></b></div>
-  <div class="tab" id="tabReal" onclick="go('real')">Живые люди <b id="objCount"></b></div>
 </div>
 <svg id="map" viewBox="0 0 1000 720"></svg>
 <div id="gaps"></div>
-<div id="real"></div>
 <div id="panel"><span class="close" onclick="hide()">×</span><div id="pbody"></div></div>
 
 <script src="data/engine.js"></script>
 <script src="data/niche-faceless.js"></script>
-<script src="data/objections-faceless.js"></script>
 <script>
 const {TAXONOMY, STRENGTH, auditClaim} = ProofMap;
 const N = NICHES.faceless_youtube.claims;
@@ -238,61 +221,12 @@ function merged(){
   });
 }
 
-// ── БЛОК «ЧТО ГОВОРЯТ ЖИВЫЕ ЛЮДИ» ──
-// Связка Reddit ↔ карта: кластеры возражений, бьющие в это утверждение.
-// Цитаты дословные, из r/NewTubers, каждая проверена по исходнику.
-function pushBlock(id){
-  const ks = objectionsFor(id);
-  if (!ks || !ks.length) return '';
-  const total = ks.reduce((s,k)=>s+k.count, 0);
-  const body = ks.map(k => `<div class="k-cluster">
-      <div class="k-name">${esc2(k.name)}</div>
-      <div class="k-meta">${k.count} из ${k.sample} комментариев · сила удара ${k.power}/10 · как закрыть: ${esc2(k.fix)}</div>
-      ${k.quotes.map(q => `<div class="q">«${esc2(q.t)}» <span class="ref">[${q.n}]</span></div>`).join('')}
-    </div>`).join('');
-  return `<div class="push" id="push_${id}">
-      <div class="push-h" onclick="this.parentNode.classList.toggle('open')">
-        <span>⚡ что говорят живые люди <i>(${ks.length} ${ks.length===1?'кластер':'кластеров'}, ${total} упоминаний)</i></span>
-        <span class="push-n">${ks.length}</span>
-      </div>
-      <div class="push-body">${body}</div>
-    </div>`;
-}
-
 function go(screen){
   document.getElementById('tabMap').classList.toggle('on', screen==='map');
   document.getElementById('tabGaps').classList.toggle('on', screen==='gaps');
-  document.getElementById('tabReal').classList.toggle('on', screen==='real');
   document.getElementById('map').style.display  = screen==='map' ? 'block' : 'none';
   document.getElementById('gaps').classList.toggle('on', screen==='gaps');
-  document.getElementById('real').classList.toggle('on', screen==='real');
   if (screen==='gaps') renderGaps();
-  if (screen==='real') renderReal();
-}
-
-// ── ВКЛАДКА «ЖИВЫЕ ЛЮДИ» ──
-// Обзор: 10 кластеров возражений, кто в какие утверждения бьёт.
-// Это противоположность нашей карте: там мы заявляем, здесь живые люди спорят.
-function renderReal(){
-  if (!window.OBJECTIONS){ return; }
-  const M = OBJECTIONS.meta;
-  const box = document.getElementById('real');
-  document.getElementById('objCount').textContent = OBJECTIONS.clusters.length;
-  const head = `<div class="obj" style="margin-bottom:14px">
-      Источник: ${esc2(M.source)} · собрано ${M.collected}<br>
-      ${esc2(M.verified)}<br>
-      ⚠️ ${esc2(M.caveat)}</div>`;
-  const rows = OBJECTIONS.clusters
-    .map(k => `<div class="gap" style="--risk:${k.power>=9?'#ef4444':k.power>=7?'#f97316':'#eab308'}">
-        <div class="risk-badge">сила ${k.power}/10</div>
-        <h4>${esc2(k.name)}</h4>
-        <div class="why">${esc2(k.gist)}</div>
-        <div class="meta">${k.count} из ${k.sample} комментариев · ломает: ${k.hits.map(h=>{
-            const c = N.find(x=>x.id===h); return c ? esc2(c.text.slice(0,40)) : h; }).join(' · ')}</div>
-        ${k.quotes.map(q=>`<div class="q">«${esc2(q.t)}» <span class="ref">[${q.n}]</span></div>`).join('')}
-        <div class="obj">Как закрыть: ${esc2(k.fix)}</div>
-      </div>`).join('');
-  box.innerHTML = head + rows;
 }
 
 function renderGaps(){
@@ -319,7 +253,6 @@ function renderGaps(){
             <input id="in_${c.id}" placeholder="добавить источник: что именно доказывает">
             <div class="btn" onclick="addSrc('${c.id}')">закрыть дыру</div>
           </div>
-          ${pushBlock(c.id)}
           <div class="slider-row">
             <label>сила утверждения</label>
             <input type="range" min="1" max="10" value="${claimOf(c)}" id="sl_${c.id}"

@@ -62,9 +62,33 @@ function riskOf(c) {
   const overclaim = Math.max(0, (c.claimPower || 5) - w);   // голос выше доказательства
   const hollow   = (!c.sources || !c.sources.length) ? 3 : 0; // голословное вообще
   const noN      = (c.sources || []).some(s => s.n === undefined || s.n === null) ? 1 : 0;
-  return overclaim * 2 + hollow * 2 + noN;
+  // 🔴 Давление реальности: сколько живых людей в Reddit бьют именно в это утверждение.
+  //    Новый член (дип-луп 9). Считается из OBJECTIONS.clusters[].hits.
+  const pushback = (window.OBJECTIONS ? objectionLoad(c.id) : 0);
+  return overclaim * 2 + hollow * 2 + noN + pushback;
 }
 
-window.ProofMap = { TAXONOMY, STRENGTH, auditClaim, riskOf };
+/** Суммарное давление реальности на утверждение: частота×сила по всем кластерам,
+ *  которые бьют в него. 0 = никто не возражал. */
+function objectionLoad(claimId) {
+  if (!window.OBJECTIONS) return 0;
+  let load = 0;
+  window.OBJECTIONS.clusters.forEach(k => {
+    if (k.hits && k.hits.indexOf(claimId) !== -1) {
+      // нормируем частоту на 100 комментариев, чтобы «22 из 178» и «2 из 178» были сравнимы
+      const per100 = Math.round((k.count / k.sample) * 100);
+      load += Math.round(per100 * k.power / 10);   // сила вносит вес
+    }
+  });
+  return load;
+}
+
+/** Все кластеры возражений, бьющих в это утверждение, с их реальными цитатами. */
+function objectionsFor(claimId) {
+  if (!window.OBJECTIONS) return [];
+  return window.OBJECTIONS.clusters.filter(k => k.hits && k.hits.indexOf(claimId) !== -1);
+}
+
+window.ProofMap = { TAXONOMY, STRENGTH, auditClaim, riskOf, objectionLoad, objectionsFor };
 if (typeof module !== 'undefined') module.exports = window.ProofMap;
 })();

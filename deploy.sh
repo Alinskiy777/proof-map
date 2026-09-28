@@ -18,7 +18,7 @@ open(os.path.expanduser('~/.hermes/cache/scratch/_pm.js'),'w',encoding='utf-8').
 raise SystemExit(bad)
 PY
 node --check "$HOME/.hermes/cache/scratch/_pm.js" && echo "  ✅ JS валиден" || exit 1
-node --check data/engine.js && node --check data/niche-faceless.js && echo "  ✅ данные валидны"
+node --check data/engine.js && node --check data/niche-faceless.js && node --check data/objections-faceless.js && echo "  ✅ данные валидны"
 git add -A
 git diff --cached --quiet || git commit -q -m "Карта доказательств: движок + ниша faceless YouTube"
 git push origin main && echo "  ✅ запушено"
