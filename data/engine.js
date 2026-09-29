@@ -28,6 +28,8 @@ const STRENGTH = {
   demo:       { w: 8, name: 'Живая демонстрация' },
   endorse:    { w: 8, name: 'Рекомендация авторитета' },
   case:       { w: 7, name: 'Кейс с цифрами' },
+  regulatory: { w: 10, name: 'Регулятор / госреестр' },
+  market:     { w: 6, name: 'Рыночная статистика' },
   track:      { w: 7, name: 'Собственный track record' },
   pattern:    { w: 7, name: 'Повторяющийся паттерн' },
   proven:     { w: 7, name: 'Доказанный результат' },
