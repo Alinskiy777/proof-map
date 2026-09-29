@@ -40,23 +40,31 @@
   /* ── экран «Пробелы» ── */
   #gaps{display:none;padding:0 20px 30px}
   #gaps.on{display:block}
-  .gap{border:1px solid var(--line);border-radius:12px;background:var(--card);
-       padding:13px 15px;margin-bottom:10px;position:relative;overflow:hidden}
+  .gap{border:1px solid var(--line);border-radius:14px;background:var(--card);
+       padding:18px 20px;margin-bottom:14px;position:relative;overflow:hidden;
+       transition:border-color .18s ease, transform .18s ease, box-shadow .18s ease}
+  .gap:hover{border-color:#7f1d3a;transform:translateX(2px);
+       box-shadow:-6px 0 22px -12px rgba(127,29,58,.75)}
   .gap::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--risk)}
-  .gap h4{margin:0 0 5px;font-size:14.5px;font-weight:600;padding-right:120px}
-  .gap .why{color:#ffb4c6;font-size:12.5px;margin-bottom:8px}
-  .gap .meta{color:var(--dim);font-size:12px;margin-bottom:9px}
-  .risk-badge{position:absolute;top:13px;right:15px;background:#3b1520;color:#ffc9d6;
-              border:1px solid #7f1d3a;border-radius:20px;padding:2px 9px;font-size:11.5px}
-  .src-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .gap h4{margin:0 0 7px;font-size:15px;font-weight:650;line-height:1.4;
+          letter-spacing:-.1px;padding-right:132px}
+  .gap .why{color:#ffb4c6;font-size:12.5px;margin-bottom:10px;line-height:1.5}
+  .gap .meta{color:var(--dim);font-size:12px;margin-bottom:11px;line-height:1.55}
+  .risk-badge{position:absolute;top:16px;right:18px;background:#3b1520;color:#ffc9d6;
+              border:1px solid #7f1d3a;border-radius:20px;padding:3px 10px;font-size:11.5px;
+              font-weight:600;font-variant-numeric:tabular-nums}
+  .src-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .src-row input{flex:1;min-width:190px;background:#0d1426;border:1px solid var(--line);
-                 color:var(--fg);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit}
-  .src-row input:focus{outline:none;border-color:#3b82f6}
-  .btn{background:#1e3a8a;color:#dbeafe;border:1px solid #2b4a9e;border-radius:8px;
-       padding:7px 13px;font-size:12.5px;cursor:pointer;font-family:inherit}
-  .btn:hover{background:#2547a8}
+                 color:var(--fg);border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;
+                 transition:.15s}
+  .src-row input:focus{outline:none;border-color:#7f1d3a;box-shadow:0 0 0 3px rgba(127,29,58,.16)}
+  .btn{background:#1e3a8a;color:#dbeafe;border:1px solid #2b4a9e;border-radius:9px;
+       padding:9px 15px;font-size:12.5px;cursor:pointer;font-family:inherit;
+       font-weight:600;transition:.15s}
+  .btn:hover{background:#2547a8;transform:translateY(-1px)}
+  .btn:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
   .chip{font-size:11.5px;background:#16233d;border:1px solid var(--line);
-        border-radius:6px;padding:3px 8px;color:#a9c7ff}
+        border-radius:7px;padding:4px 9px;color:#a9c7ff;display:inline-block;margin:0 5px 5px 0}
   .done-note{color:#8ee0b0;font-size:12px;margin-top:6px}
   .tabs{display:flex;gap:8px;padding:0 20px 12px}
   /* ── ползунок силы утверждения ── */
@@ -121,6 +129,26 @@
     cursor:pointer;line-height:1;transition:.15s}
   .finclose:hover{border-color:#7f1d3a;color:#e8d5dd}
   .finmodal h2{margin:0 0 4px;font-size:19px;letter-spacing:-.2px}
+  .tools{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .tools input{width:200px;padding:6px 11px;border:1px solid var(--line2);border-radius:999px;
+    background:rgba(0,0,0,.25);color:var(--fg);font-size:12.5px;font-family:inherit;transition:.15s}
+  .tools input:focus{outline:none;border-color:#7f1d3a;box-shadow:0 0 0 3px rgba(127,29,58,.16)}
+  .tools input::placeholder{color:var(--mut);opacity:.75}
+  .qnote{font-size:11.5px;font-weight:600;color:#b98ea0;min-width:0;white-space:nowrap}
+  .gap{position:relative}
+  .gap-no{position:absolute;top:10px;right:12px;font-size:10.5px;font-weight:600;
+    color:var(--mut);font-variant-numeric:tabular-nums;letter-spacing:.3px}
+  .need{margin:6px 0 7px;padding:6px 10px;border-radius:7px;background:rgba(250,204,21,.09);
+    border-left:2px solid rgba(234,179,8,.55);font-size:12px;color:#fde68a;line-height:1.45}
+  .tbtn{padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:transparent;
+    color:var(--mut);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .tbtn:hover{border-color:#7f1d3a;color:#e8d5dd;background:rgba(127,29,58,.10)}
+  .tbtn:focus-visible{outline:2px solid #7f1d3a;outline-offset:2px}
+  .gap.hit,.srcbox.hit{outline:2px solid #7f1d3a;outline-offset:2px;border-radius:10px}
+  .tab{position:relative}
+  .tab::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+    background:linear-gradient(90deg,transparent,#7f1d3a,transparent);opacity:0;transition:.2s}
+  .tab:hover::after{opacity:.55}
   .finsub{margin:0 0 16px;font-size:12.5px;color:var(--mut);line-height:1.5}
   .finmodal label{display:block;margin-bottom:11px;font-size:12px;font-weight:600;color:var(--mut)}
   .finmodal input{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--line2);
@@ -137,6 +165,10 @@
   .fv{padding:11px 13px;border-radius:10px;font-size:12.5px;line-height:1.55}
   .fv.ok{background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.32);color:#bbf7d0}
   .fv.bad{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.32);color:#fecaca}
+  .legend .hint{width:100%;margin-top:7px;padding-top:8px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--mut)}
+  .legend .hint b{color:#d9c9cf;font-weight:700;background:rgba(255,255,255,.06);
+    border:1px solid var(--line2);border-radius:5px;padding:1px 6px;margin:0 1px;font-size:11px}
 </style>
 </head>
 <body>
@@ -154,11 +186,18 @@
   <div class="lg"><span class="dot" style="background:#eab308"></span>частично / без n</div>
   <div class="lg"><span class="dot" style="background:#ef4444"></span>дыра</div>
   <div class="lg">размер = сила доказательства · нажми на вершину</div>
+  <div class="hint" id="mapHint">Клавиши: <b>1</b> карта · <b>2</b> пробелы · <b>3</b> живые люди · <b>/</b> поиск · <b>Esc</b> закрыть</div>
 </div>
 <div class="tabs">
-  <div class="tab on" id="tabMap" onclick="go('map')">Карта</div>
-  <div class="tab" id="tabGaps" onclick="go('gaps')">Пробелы <b id="gapCount"></b></div>
-  <div class="tab" id="tabReal" onclick="go('real')">Живые люди <b id="objCount"></b></div>
+  <div class="tab on" id="tabMap" onclick="go('map')" title="Клавиша 1">Карта</div>
+  <div class="tab" id="tabGaps" onclick="go('gaps')" title="Клавиша 2">Пробелы <b id="gapCount"></b></div>
+  <div class="tab" id="tabReal" onclick="go('real')" title="Клавиша 3">Живые люди <b id="objCount"></b></div>
+  <div class="tools">
+    <input id="q" placeholder="найти дыру или возражение…" oninput="applyQ()" aria-label="Поиск">
+    <span class="qnote" id="qnote"></span>
+    <button class="tbtn" onclick="expandAll(true)" title="Развернуть все цитаты">Развернуть</button>
+    <button class="tbtn" onclick="expandAll(false)" title="Свернуть все">Свернуть</button>
+  </div>
 </div>
 <svg id="map" viewBox="0 0 1000 720"></svg>
 <div id="gaps"></div>
@@ -182,7 +221,7 @@
 <script src="data/objections-faceless.js"></script>
 <script src="data/competitor-proof.js"></script>
 <script>
-const {TAXONOMY, STRENGTH, auditClaim} = ProofMap;
+const {TAXONOMY, STRENGTH, auditClaim, riskOf, objectionsFor} = ProofMap;
 const N = NICHES.faceless_youtube.claims;
 
 // ── раскладка: 8 ветвей по кольцу, вершины дугой вокруг центра ──
@@ -374,14 +413,19 @@ function renderGaps(){
   document.getElementById('gaps').innerHTML =
     list.length === 0
       ? '<div class="stat" style="display:inline-block">✅ Дыр нет. Все утверждения держатся доказательствами.</div>'
-      : list.map(x => {
+      : list.map((x, i) => {
         const c = x.c, w = STRENGTH[c.type] || {w:3, name:c.type};
         const col = x.r >= 9 ? '#ef4444' : x.r >= 6 ? '#f97316' : '#eab308';
         const srcs = (c.sources||[]).map(s =>
           `<span class="chip">${esc2(s.name)}${s.n?' · n='+s.n:' · n не указан'}</span>`).join(' ');
+        // Прогон 7: прямым текстом — чего именно не хватает, иначе дыра просто «красная»
+        const need = x.a.ok ? (x.a.warn || 'не хватает силы доказательства')
+                            : (x.a.msg || 'источников нет');
         return `<div class="gap" style="--risk:${col}">
           <div class="risk-badge">риск ${x.r}</div>
+          <div class="gap-no">${i+1} из ${list.length}</div>
           <h4>${esc2(c.text)}</h4>
+          <div class="need">Чтобы закрыть: ${esc2(need)}</div>
           <div class="why">${x.a.ok ? '⚠ '+esc2(x.a.warn) : '❌ '+esc2(x.a.msg)}</div>
           <div class="meta">${esc2(TAXONOMY[c.branch].name)} · ${esc2(w.name)}
             · сила доказательства ${w.w}/10 · сила утверждения ${claimOf(c)}/10</div>
@@ -493,12 +537,42 @@ function refreshStats(){
 }
 
 // пересчёт после добавления источника: карта и статистика должны честно меняться
+// ── Прогон 5: удобство. Поиск по дырам и возражениям, развернуть/свернуть всё,
+// горячие клавиши 1/2/3, Esc закрывает окно, / фокусирует поиск.
+function applyQ(){
+  const v = (document.getElementById('q').value||'').trim().toLowerCase();
+  let hits = 0;
+  document.querySelectorAll('#gaps .gap, #real .gap').forEach(el=>{
+    const on = !v || el.textContent.toLowerCase().includes(v);
+    el.classList.toggle('hit', !!v && on);
+    el.style.opacity = (v && !on) ? '.28' : '';
+    if (on && v) hits++;
+  });
+  const note = document.getElementById('qnote');
+  if (note) note.textContent = v ? (hits ? `найдено: ${hits}` : 'ничего не найдено') : '';
+}
+function expandAll(on){
+  document.querySelectorAll('.srcbox').forEach(b=>b.classList.toggle('on', on));
+}
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape'){ closeFin(); hide(); }
+  if (e.key==='/' && document.activeElement!==document.getElementById('q')){
+    e.preventDefault(); document.getElementById('q').focus(); return;
+  }
+  if (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (e.key==='1') go('map');
+  if (e.key==='2') go('gaps');
+  if (e.key==='3') go('real');
+});
 function repaint(){
   drawMap(merged());
   refreshStats();
 }
 
 renderGaps();
+// Прогон 4: вкладка «Живые люди» была пуста до клика — выглядело как «нет данных».
+// Рендерим на старте, чтобы содержимое было видно сразу, без угадывания.
+renderReal();
 </script>
 
 <!-- Финмодели: считает, а не обещает -->

@@ -6,16 +6,22 @@ function mk(id){return {id,_h:'',_t:'',classList:{cls:new Set(),
   set textContent(v){this._t=String(v)}, get textContent(){return this._t},
   addEventListener(){}, removeEventListener(){},
   style:{}, value:''};}
-global.document={getElementById(id){if(!nodes[id])nodes[id]=mk(id);return nodes[id]}};
+global.document={getElementById(id){if(!nodes[id])nodes[id]=mk(id);return nodes[id]},
+  querySelectorAll(sel){return (document._sel[sel]||[]).slice()},
+  addEventListener(){}, activeElement:null};
+global.document._sel={};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>{store[k]=v},removeItem:k=>{delete store[k]}};
 const w={};global.window=w;
 const R=p=>eval(fs.readFileSync(p,'utf8'));
 R(H+'/proof-map/data/engine.js'.replace('if (typeof module','if (0&&typeof module'));
 R(H+'/proof-map/data/niche-faceless.js');
 R(H+'/proof-map/data/objections-faceless.js');
-global.ProofMap=w.ProofMap; global.NICHES=w.NICHES; global.riskOf=w.ProofMap.riskOf;
+global.ProofMap=w.ProofMap; global.NICHES=w.NICHES;
 global.OBJECTIONS=w.OBJECTIONS;
-global.objectionLoad=w.ProofMap.objectionLoad; global.objectionsFor=w.ProofMap.objectionsFor;
+// 🔴 НЕ подставляем riskOf/objectionsFor в global: в браузере index.html обязан
+// получить их деструккцией из ProofMap. Подмена здесь маскировала бы боевую ошибку
+// ReferenceError — именно так вкладка «Пробелы» молча оставалась пустой.
+const {objectionLoad} = w.ProofMap;   // тест сам её зовёт — импорт честный, из движка
 const h=fs.readFileSync(H+'/proof-map/index.html','utf8');
 eval(h.split('<script>')[1].split('</'+'script>')[0]);
 let fail=0; const ok=(c,m)=>{console.log('  '+(c?'✅':'❌')+' '+m); if(!c)fail++;};
@@ -88,7 +94,7 @@ console.log('\n'+(f2?('❌ ползунок: провалено '+f2):'✅ по�
 // ═══ ТЕСТ МОСТА REDDIT ↔ ПРИЛОЖЕНИЕ ═══
 console.log('\n═══ МОСТ: ЖИВЫЕ ЛЮДИ ↔ КАРТА ═══');
 let f3=0; const ok3=(c,m)=>{console.log('  '+(c?'✅':'❌')+' '+m); if(!c)f3++;};
-ok3(typeof objectionsFor==='function','движок знает про возражения');
+ok3(typeof w.ProofMap.objectionsFor==='function','движок знает про возражения');
 ok3(w.OBJECTIONS && w.OBJECTIONS.clusters.length===10,'кластеров загружено: '+(w.OBJECTIONS?w.OBJECTIONS.clusters.length:0));
 // каждый кластер бьёт в существующие id
 const nicheIds=new Set(w.NICHES.faceless_youtube.claims.map(c=>c.id));
@@ -135,5 +141,28 @@ ok(/bad/.test(nodes.finverdict.innerHTML),'на убытке вердикт че
 nodes.fv.value='500000'; nodes.fc.value='120'; nodes.fn.value='0'; nodes.fe.value='400';
 finCalc();
 ok(!/NaN/.test(nodes.finout.innerHTML),'ноль роликов не даёт NaN');
-console.log(fail? `\n❌ ПРОВАЛОВ: ${fail}` : '\n✅ ФИНМОДЕЛИ: ВСЁ ЗЕЛЁНОЕ');
-process.exit(fail?1:0);
+console.log(fail? `\n❌ ФИНМОДЕЛИ — провалов: ${fail}` : '\n✅ ФИНМОДЕЛИ: ВСЁ ЗЕЛЁНОЕ');
+// process.exit здесь НЕ ставим: ниже ещё прогоны 5+
+
+console.log('═══ ПРОГОН 5: ПОИСК И УДОБСТВО ═══');
+ok(typeof applyQ==='function','функция поиска есть');
+ok(typeof expandAll==='function','развернуть/свернуть есть');
+// эмулируем 3 карточки
+const cardsQ=[{textContent:'Конкуренция бездонная тысячи каналов',classList:{cls:new Set(['gap']),toggle(c,v){v?this.cls.add(c):this.cls.delete(c)}},style:{}},
+            {textContent:'Монетизация не гарантирована',classList:{cls:new Set(['gap']),toggle(c,v){v?this.cls.add(c):this.cls.delete(c)}},style:{}},
+            {textContent:'Ниша перенасыщена',classList:{cls:new Set(['gap']),toggle(c,v){v?this.cls.add(c):this.cls.delete(c)}},style:{}}];
+document._sel['#gaps .gap, #real .gap']=cardsQ;
+nodes.q = mk('q'); nodes.qnote = mk('qnote');   // мок создаёт узлы по требованию
+nodes.q.value='конкуренция'; applyQ();
+ok(cardsQ[0].classList.cls.has('hit'),'найдена нужная карточка');
+ok(!cardsQ[1].classList.cls.has('hit'),'ненужная не подсвечена');
+ok(cardsQ[1].style.opacity==='.28','ненужная приглушена — видно, что она есть, но не в выдаче');
+ok(nodes.qnote.textContent==='найдено: 1','счётчик найденного честный: '+nodes.qnote.textContent);
+nodes.q.value='щщщ'; applyQ();
+ok(nodes.qnote.textContent==='ничего не найдено','пустой результат говорит прямо, а не молчит');
+nodes.q.value=''; applyQ();
+ok(cardsQ.every(f=>!f.classList.cls.has('hit')&&f.style.opacity===''),'сброс поиска возвращает всё');
+ok(h.includes("onclick=\"expandAll(true)\"")&&h.includes("onclick=\"expandAll(false)\""),'кнопки развернуть/свернуть в интерфейсе');
+ok(h.includes("if (e.key==='2') go('gaps');"),'горячие клавиши 1/2/3 заявлены');
+ok(h.includes("id=\"q\""),'поле поиска есть');
+console.log(fail? `\n❌ ПРОВАЛОВ: ${fail}` : '\n✅ ПОИСК И УДОБСТВО: ВСЁ ЗЕЛЁНОЕ');
