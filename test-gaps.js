@@ -4,6 +4,7 @@ function mk(id){return {id,_h:'',_t:'',classList:{cls:new Set(),
   add(c){this.cls.add(c)},remove(c){this.cls.delete(c)},toggle(c,v){v?this.cls.add(c):this.cls.delete(c)},contains(c){return this.cls.has(c)}},
   set innerHTML(v){this._h=String(v)}, get innerHTML(){return this._h},
   set textContent(v){this._t=String(v)}, get textContent(){return this._t},
+  addEventListener(){}, removeEventListener(){},
   style:{}, value:''};}
 global.document={getElementById(id){if(!nodes[id])nodes[id]=mk(id);return nodes[id]}};
 global.localStorage={getItem:k=>store[k]||null,setItem:(k,v)=>{store[k]=v},removeItem:k=>{delete store[k]}};
@@ -114,3 +115,25 @@ ok3((nodes.real.innerHTML.match(/class="gap"/g)||[]).length===10,'10 класт�
 // честность: оговорка про один сабреддит
 ok3(nodes.real.innerHTML.includes('один сабреддит'),'оговорка «один сабреддит» показана честно');
 console.log('\n'+(f3?('❌ мост: провалено '+f3):'✅ мост: ВСЁ ЗЕЛЁНОЕ'));
+
+console.log('═══ ТЕСТ ФИНМОДЕЛЕЙ ═══');
+// второй инлайн-скрипт (блок финмоделей в конце body)
+const finBlock = h.split('<script>').filter(b=>b.includes('function finCalc'))[0];
+eval(finBlock.split('</'+'script>')[0]);
+ok(!!document.getElementById('fin'),'модальное окно есть');
+ok(!!document.getElementById('fv')&&!!document.getElementById('fc')&&!!document.getElementById('fn')&&!!document.getElementById('fe'),'4 поля ввода на месте');
+ok(typeof openFin==='function'&&typeof closeFin==='function'&&typeof finCalc==='function','функции объявлены');
+nodes.fv.value='500000'; nodes.fc.value='120'; nodes.fn.value='12'; nodes.fe.value='400';
+finCalc();
+ok(/60\s*000/.test(nodes.finout.innerHTML),'доход 500000/1000*120 = 60 000 ₽ посчитан');
+ok(/55\s*200/.test(nodes.finout.innerHTML),'чистыми 60 000 − 4 800 = 55 200 ₽');
+ok(/ok/.test(nodes.finverdict.className+'')||/ok/.test(nodes.finverdict.innerHTML),'вердикт вынесен');
+nodes.fv.value='50000'; nodes.fc.value='60'; nodes.fn.value='12'; nodes.fe.value='400';
+finCalc();
+ok(/−1\s*800/.test(nodes.finout.innerHTML),'убыток −1 800 ₽ считается честно, а не скрывается');
+ok(/bad/.test(nodes.finverdict.innerHTML),'на убытке вердикт честный');
+nodes.fv.value='500000'; nodes.fc.value='120'; nodes.fn.value='0'; nodes.fe.value='400';
+finCalc();
+ok(!/NaN/.test(nodes.finout.innerHTML),'ноль роликов не даёт NaN');
+console.log(fail? `\n❌ ПРОВАЛОВ: ${fail}` : '\n✅ ФИНМОДЕЛИ: ВСЁ ЗЕЛЁНОЕ');
+process.exit(fail?1:0);

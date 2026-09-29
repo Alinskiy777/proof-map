@@ -88,12 +88,65 @@
   .q{border-left:2px solid #7f1d3a;padding:2px 0 2px 9px;margin-bottom:6px;
      font-size:12.5px;color:#d9c9cf;font-style:italic}
   .q .ref{color:#8a7a80;font-style:normal;font-size:11px}
+  .srcbtn{margin-top:10px;padding:7px 13px;border:1px solid var(--line);border-radius:999px;
+    background:transparent;color:var(--mut);font-size:12.5px;font-weight:600;cursor:pointer;
+    transition:.16s ease;font-family:inherit}
+  .srcbtn:hover{border-color:#7f1d3a;color:#e8d5dd;background:rgba(127,29,58,.10)}
+  .srcbtn:focus-visible{outline:2px solid #7f1d3a;outline-offset:2px}
+  .srcbox{display:none;margin-top:10px;padding:11px 13px;border-left:2px solid var(--line);
+    border-radius:0 8px 8px 0;background:rgba(255,255,255,.022)}
+  .srcbox.on{display:block}
+  .finbtn{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;
+    margin-top:12px;padding:9px 17px 10px;border:1px solid #7f1d3a;border-radius:11px;
+    background:linear-gradient(140deg,rgba(127,29,58,.20),rgba(127,29,58,.06));
+    text-decoration:none;cursor:pointer;transition:.18s cubic-bezier(.2,.7,.3,1);position:relative;overflow:hidden}
+  .finbtn::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.10) 50%,transparent 70%);
+    transform:translateX(-100%);transition:transform .5s}
+  .finbtn:hover{transform:translateY(-2px);border-color:#a12644;
+    box-shadow:0 6px 20px -6px rgba(127,29,58,.55)}
+  .finbtn:hover::after{transform:translateX(100%)}
+  .finbtn:active{transform:translateY(0)}
+  .finbtn:focus-visible{outline:2px solid #a12644;outline-offset:3px}
+  .fin-t{font-size:14.5px;font-weight:700;color:#f0e2e8;letter-spacing:.2px}
+  .fin-b{font-size:10.5px;font-weight:600;color:#b98ea0;letter-spacing:1.5px;text-transform:uppercase}
+  .finwrap{display:none;position:fixed;inset:0;z-index:60;background:rgba(8,4,6,.72);
+    backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:20px}
+  .finwrap.on{display:flex}
+  .finmodal{position:relative;width:100%;max-width:400px;background:var(--card);
+    border:1px solid var(--line2);border-radius:16px;padding:24px 24px 20px;
+    box-shadow:0 24px 60px -18px rgba(0,0,0,.85);animation:finin .22s cubic-bezier(.2,.8,.3,1)}
+  @keyframes finin{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+  .finclose{position:absolute;top:12px;right:14px;width:28px;height:28px;border-radius:50%;
+    border:1px solid var(--line);background:transparent;color:var(--mut);font-size:17px;
+    cursor:pointer;line-height:1;transition:.15s}
+  .finclose:hover{border-color:#7f1d3a;color:#e8d5dd}
+  .finmodal h2{margin:0 0 4px;font-size:19px;letter-spacing:-.2px}
+  .finsub{margin:0 0 16px;font-size:12.5px;color:var(--mut);line-height:1.5}
+  .finmodal label{display:block;margin-bottom:11px;font-size:12px;font-weight:600;color:var(--mut)}
+  .finmodal input{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--line2);
+    border-radius:9px;background:rgba(0,0,0,.28);color:var(--fg);font-size:14.5px;
+    font-variant-numeric:tabular-nums;font-family:inherit;transition:.15s}
+  .finmodal input:focus{outline:none;border-color:#7f1d3a;box-shadow:0 0 0 3px rgba(127,29,58,.18)}
+  .finout{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .frow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+    padding:5px 0;font-size:13px;color:var(--mut)}
+  .frow b{color:var(--fg);font-variant-numeric:tabular-nums;font-weight:600}
+  .frow.big{font-size:15px;padding:9px 0 4px;border-top:1px dashed var(--line);margin-top:5px}
+  .frow.big b{font-size:19px;font-weight:700}
+  .finverdict{margin-top:12px}
+  .fv{padding:11px 13px;border-radius:10px;font-size:12.5px;line-height:1.55}
+  .fv.ok{background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.32);color:#bbf7d0}
+  .fv.bad{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.32);color:#fecaca}
 </style>
 </head>
 <body>
 <header>
   <h1>Карта доказательств</h1>
   <div class="sub" id="subtitle">загрузка…</div>
+  <a class="finbtn" href="#" onclick="openFin();return false">
+    <span class="fin-t">Финмодели</span>
+    <span class="fin-b">Мяумяу</span>
+  </a>
 </header>
 <div class="bar" id="stats"></div>
 <div class="legend">
@@ -111,7 +164,19 @@
 <div id="gaps"></div>
 <div id="real"></div>
 <div id="panel"><span class="close" onclick="hide()">×</span><div id="pbody"></div></div>
-
+<div id="fin" class="finwrap" onclick="if(event.target===this)closeFin()">
+  <div class="finmodal" role="dialog" aria-modal="true" aria-labelledby="finh">
+    <button class="finclose" onclick="closeFin()" aria-label="Закрыть">×</button>
+    <h2 id="finh">Финмодели</h2>
+    <p class="finsub">Считает, а не обещает. Все поля — твои цифры, никаких «в среднем по рынку».</p>
+    <label>Просмотров в месяц<input id="fv" type="number" value="500000" min="0"></label>
+    <label>Цена за 1 000 просмотров (CPM), ₽<input id="fc" type="number" value="120" min="0"></label>
+    <label>В месяц выпущено роликов<input id="fn" type="number" value="12" min="0"></label>
+    <label>Затраты на один ролик, ₽<input id="fe" type="number" value="400" min="0"></label>
+    <div class="finout" id="finout"></div>
+    <div class="finverdict" id="finverdict"></div>
+  </div>
+</div>
 <script src="data/engine.js"></script>
 <script src="data/niche-faceless.js"></script>
 <script src="data/objections-faceless.js"></script>
@@ -246,10 +311,11 @@ function pushBlock(id){
   const ks = objectionsFor(id);
   if (!ks || !ks.length) return '';
   const total = ks.reduce((s,k)=>s+k.count, 0);
+  const nqAll = ks.reduce((s,k)=>s+(k.quotes||[]).length, 0);
   const body = ks.map(k => `<div class="k-cluster">
       <div class="k-name">${esc2(k.name)}</div>
-      <div class="k-meta">${k.count} из ${k.sample} комментариев · сила удара ${k.power}/10 · как закрыть: ${esc2(k.fix)}</div>
-      ${k.quotes.map(q => `<div class="q">«${esc2(q.t)}» <span class="ref">[${q.n}]</span></div>`).join('')}
+      <div class="k-meta">${(k.quotes||[]).length} ${(k.quotes||[]).length===1?'цитата':((k.quotes||[]).length<5?'цитаты':'цитат')} · сила удара ${k.power}/10 · как закрыть: ${esc2(k.fix)}</div>
+      ${(k.quotes||[]).map(q => `<div class="q">«${esc2(q.t)}» <span class="ref">[${q.n}]</span></div>`).join('')}
     </div>`).join('');
   return `<div class="push" id="push_${id}">
       <div class="push-h" onclick="this.parentNode.classList.toggle('open')">
@@ -284,15 +350,19 @@ function renderReal(){
       ${esc2(M.verified)}<br>
       ⚠️ ${esc2(M.caveat)}</div>`;
   const rows = OBJECTIONS.clusters
-    .map(k => `<div class="gap" style="--risk:${k.power>=9?'#ef4444':k.power>=7?'#f97316':'#eab308'}">
+    .map(k => {
+      const nq = (k.quotes || []).length;
+      const word = nq===1 ? 'цитату' : (nq<5 ? 'цитаты' : 'цитат');
+      return `<div class="gap" style="--risk:${k.power>=9?'#ef4444':k.power>=7?'#f97316':'#eab308'}">
         <div class="risk-badge">сила ${k.power}/10</div>
         <h4>${esc2(k.name)}</h4>
         <div class="why">${esc2(k.gist)}</div>
-        <div class="meta">${k.count} из ${k.sample} комментариев · ломает: ${k.hits.map(h=>{
+        <div class="meta">ломает: ${k.hits.map(h=>{
             const c = N.find(x=>x.id===h); return c ? esc2(c.text.slice(0,40)) : h; }).join(' · ')}</div>
-        ${k.quotes.map(q=>`<div class="q">«${esc2(q.t)}» <span class="ref">[${q.n}]</span></div>`).join('')}
         <div class="obj">Как закрыть: ${esc2(k.fix)}</div>
-      </div>`).join('');
+        <button class="srcbtn" onclick="this.nextElementSibling.classList.toggle('on')">Показать ${nq} ${word} живых людей</button>
+        <div class="srcbox">${(k.quotes||[]).map(q=>`<div class="q">«${esc2(q.t)}» <span class="ref">[${q.n}]</span></div>`).join('')}</div>
+      </div>`;}).join('');
   box.innerHTML = head + rows;
 }
 
@@ -430,5 +500,32 @@ function repaint(){
 
 renderGaps();
 </script>
+
+<!-- Финмодели: считает, а не обещает -->
+<script>
+function finCalc(){
+  const g=id=>document.getElementById(id).value;
+  const v=+g('fv')||0, cpm=+g('fc')||0, n=+g('fn')||0, e=+g('fe')||0;
+  const income = v/1000*cpm, cost = n*e, net = income-cost;
+  const perR = n? net/n : 0;
+  const hours = n*1.5;                      // 1,5 ч на ролик — консервативная оценка
+  const perHour = hours? net/hours : 0;
+  document.getElementById('finout').innerHTML = `
+    <div class="frow"><span>Доход с просмотров</span><b>${money(income)} ₽</b></div>
+    <div class="frow"><span>Затраты на производство</span><b>−${money(cost)} ₽</b></div>
+    <div class="frow big"><span>Чистыми в месяц</span><b>${net<0?'−':''}${money(Math.abs(net))} ₽</b></div>
+    <div class="frow"><span>Чистыми на один ролик</span><b>${money(perR)} ₽</b></div>
+    <div class="frow"><span>В час работы (≈1,5 ч/ролик)</span><b>${money(perHour)} ₽</b></div>`;
+  // Проверка по Бенчивенге: обещание проверяемо, пока не сказано «сколько каналов столько заработало»
+  document.getElementById('finverdict').innerHTML = net > 0
+    ? `<div class="fv ok">Положительный расчёт. Это арифметика по твоим вводным — <b>не доказательство</b>, что так выйдет у всех. Нужны n выпускников с выпиской.</div>`
+    : `<div class="fv bad">Расчёт отрицательный при этих вводных. Это честнее, чем обещание «от 100к» без расчёта.</div>`;
+}
+function money(v){ return Math.round(v).toLocaleString('ru-RU'); }
+function openFin(){ document.getElementById('fin').classList.add('on'); finCalc(); }
+function closeFin(){ document.getElementById('fin').classList.remove('on'); }
+['fv','fc','fn','fe'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', finCalc); });
+</script>
+
 </body>
 </html>
