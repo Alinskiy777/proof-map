@@ -167,21 +167,5 @@ ok(h.includes("if (e.key==='2') go('gaps');"),'горячие клавиши 1/2
 ok(h.includes("id=\"q\""),'поле поиска есть');
 console.log(fail? `\n❌ ПРОВАЛОВ: ${fail}` : '\n✅ ПОИСК И УДОБСТВО: ВСЁ ЗЕЛЁНОЕ');
 
-console.log('═══ ДЕКОМПОЗИЦИЯ: СЛОЙ «ПРАВИЛА РЫНКА» ═══');
-R(H+'/proof-map/data/competitor-proof.js');
-global.COMPETITOR_PROOF = w.COMPETITOR_PROOF;
-ok(!!w.COMPETITOR_PROOF, 'данные правил рынка загрузились');
-ok(w.COMPETITOR_PROOF.items.length>0, 'доказательств: '+w.COMPETITOR_PROOF.items.length);
-ok(w.COMPETITOR_PROOF.items.every(i=>i.url&&i.quote&&i.claim),'у каждого есть цитата, ссылка и формулировка');
-ok(w.COMPETITOR_PROOF.items.every(i=>w.COMPETITOR_PROOF.sourceWeights[i.src]),'у каждого известен тип источника → вес');
-nodes.rules=mk('rules'); nodes.ruleCount=mk('ruleCount');
-renderRules();
-const RH=nodes.rules.innerHTML;
-ok(RH.length>500,'раздел отрисовался, '+RH.length+' символов');
-ok((RH.match(/class="rule"/g)||[]).length===w.COMPETITOR_PROOF.items.length,
-   `все ${w.COMPETITOR_PROOF.items.length} доказательств видны пользователю, а не лежат в файле`);
-ok(RH.includes('источник ↗'),'у каждого доказательства кликабельная ссылка на первоисточник');
-ok(String(nodes.ruleCount.textContent)===String(w.COMPETITOR_PROOF.items.length),'счётчик на вкладке честный: '+nodes.ruleCount.textContent);
-ok(RH.indexOf('сила 10/10') < (RH.indexOf('сила 1/10')>0?RH.indexOf('сила 1/10'):1e9),'сильные источники показаны первыми');
-ok(h.includes("id=\"rules\"")&&h.includes("go('rules')"),'вкладка в интерфейсе и переключается');
-console.log(fail? `\n❌ ПРОВАЛОВ: ${fail}` : '\n✅ ДЕКОМПОЗИЦИЯ: СЛОЙ 7 РАБОТАЕТ');
+// Слой «Правила рынка» удалён 2026-09-29 (решение Макса) — тесты сняты вместе с ним.
+// Вернуть вместе с экраном: git revert fab3999
