@@ -631,3 +631,33 @@
 [06:18:46]     неудача (Timeout. Maybe slow down a bit) → пауза 14с
 [06:19:09]     неудача (Timeout. Maybe slow down a bit) → пауза 25с
 [06:19:43]     неудача (Timeout. Maybe slow down a bit) → пауза 34с
+[06:20:17]     ⚠ отказ, пропускаю этот запрос
+[06:20:17]   comm r/smallbusiness «video%20monetizati» до 2026-09
+[06:20:18]     неудача (Timeout. Maybe slow down a bit) → пауза 13с
+[06:20:40]     неудача (Timeout. Maybe slow down a bit) → пауза 26с
+[06:21:15]     неудача (Timeout. Maybe slow down a bit) → пауза 32с
+[06:21:48]     ⚠ отказ, пропускаю этот запрос
+[06:21:48]   comm r/SaaS «faceless» до 2026-09
+[06:21:58]     неудача (Timeout. Maybe slow down a bit) → пауза 17с
+[06:22:24]     неудача (Timeout. Maybe slow down a bit) → пауза 22с
+[06:22:47]     неудача (Timeout. Maybe slow down a bit) → пауза 32с
+[06:23:19]     ⚠ отказ, пропускаю этот запрос
+[06:23:19]   comm r/SaaS «faceless%20youtube» до 2026-09
+[06:23:28]     неудача (Timeout. Maybe slow down a bit) → пауза 15с
+[06:23:57]     неудача (Timeout. Maybe slow down a bit) → пауза 23с
+[06:24:28]     неудача (Timeout. Maybe slow down a bit) → пауза 36с
+[06:25:04]     ⚠ отказ, пропускаю этот запрос
+[06:25:04]   comm r/SaaS «faceless%20channel» до 2026-09
+[06:25:15]     неудача (Timeout. Maybe slow down a bit) → пауза 14с
+[06:25:38]     неудача (Timeout. Maybe slow down a bit) → пауза 25с
+[06:26:12]     неудача (Timeout. Maybe slow down a bit) → пауза 33с
+[06:26:45]     ⚠ отказ, пропускаю этот запрос
+[06:26:45]   comm r/SaaS «faceless%20video» до 2026-09
+[06:26:54]     неудача (Timeout. Maybe slow down a bit) → пауза 16с
+[06:27:18]     неудача (Timeout. Maybe slow down a bit) → пауза 25с
+[06:27:55]     неудача (Timeout. Maybe slow down a bit) → пауза 36с
+[06:28:31]     ⚠ отказ, пропускаю этот запрос
+[06:28:31]   comm r/SaaS «ai%20youtube%20cha» до 2026-09
+[06:28:32]     неудача (Timeout. Maybe slow down a bit) → пауза 12с
+[06:28:53]     неудача (Timeout. Maybe slow down a bit) → пауза 25с
+[06:29:28]     неудача (Timeout. Maybe slow down a bit) → пауза 36с
