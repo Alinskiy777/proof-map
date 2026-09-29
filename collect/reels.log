@@ -1,0 +1,101 @@
+[04:56:19] instaloader 4.15.3 | БД /storage/emulated/0/Documents/reddit-proof/reels.db
+[04:56:19] ─── беру nasa · осталось в очереди: 1
+JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=nasa [retrying; skip with ^C]
+Number of requests within last 10/11/20/22/30/60 minutes grouped by type:
+ *                            other:    1    1    1    1    1    1
+Instagram responded with HTTP error "429 - Too Many Requests". Please
+do not run multiple instances of Instaloader in parallel or within
+short sequence. Also, do not use any Instagram App while Instaloader
+is running.
+The request will be retried in 665 seconds, at 05:07.
+JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=nasa [retrying; skip with ^C]
+Number of requests within last 10/11/20/22/30/60 minutes grouped by type:
+ *                            other:    1    1    2    2    2    2
+Instagram responded with HTTP error "429 - Too Many Requests". Please
+do not run multiple instances of Instaloader in parallel or within
+short sequence. Also, do not use any Instagram App while Instaloader
+is running.
+The request will be retried in 665 seconds, at 05:18.
+[05:18:35] ❌ nasa — ConnectionException: JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/user
+[05:31:35] ─── беру arina_alexx_expert · осталось в очереди: 5
+JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=arina_alexx_expert [retrying; skip with ^C]
+Number of requests within last 10/11/20/22/30/60 minutes grouped by type:
+ *                            other:    1    1    1    1    1    1
+Instagram responded with HTTP error "429 - Too Many Requests". Please
+do not run multiple instances of Instaloader in parallel or within
+short sequence. Also, do not use any Instagram App while Instaloader
+is running.
+The request will be retried in 665 seconds, at 05:42.
+JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=arina_alexx_expert [retrying; skip with ^C]
+Number of requests within last 10/11/20/22/30/60 minutes grouped by type:
+ *                            other:    1    1    2    2    2    2
+Instagram responded with HTTP error "429 - Too Many Requests". Please
+do not run multiple instances of Instaloader in parallel or within
+short sequence. Also, do not use any Instagram App while Instaloader
+is running.
+The request will be retried in 665 seconds, at 05:53.
+[05:53:55] ❌ arina_alexx_expert — ConnectionException: JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/user
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/instaloadercontext.py", line 467, in get_json
+    raise TooManyRequestsException(self._response_error(resp))
+instaloader.exceptions.TooManyRequestsException: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=arina_alexx_expert
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/instaloadercontext.py", line 467, in get_json
+    raise TooManyRequestsException(self._response_error(resp))
+instaloader.exceptions.TooManyRequestsException: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=arina_alexx_expert
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/instaloadercontext.py", line 467, in get_json
+    raise TooManyRequestsException(self._response_error(resp))
+instaloader.exceptions.TooManyRequestsException: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=arina_alexx_expert
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/proof-map/collect/reels_collect.py", line 111, in main
+    collect(u, con)
+    ~~~~~~~^^^^^^^^
+  File "/data/data/com.termux/files/home/proof-map/collect/reels_collect.py", line 69, in collect
+    p = instaloader.Profile.from_username(L.context, username)
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/structures.py", line 1007, in from_username
+    data = context.get_json(
+           ~~~~~~~~~~~~~~~~^
+        "api/v1/users/web_profile_info/", params={"username": username.lower()}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ).get("data")
+    ^
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/instaloadercontext.py", line 493, in get_json
+    return self.get_json(path=path, params=params, host=host, session=sess, _attempt=_attempt + 1,
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         response_headers=response_headers)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/instaloadercontext.py", line 493, in get_json
+    return self.get_json(path=path, params=params, host=host, session=sess, _attempt=_attempt + 1,
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         response_headers=response_headers)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/instaloader/instaloadercontext.py", line 481, in get_json
+    raise ConnectionException(error_string) from err
+instaloader.exceptions.ConnectionException: JSON Query to api/v1/users/web_profile_info/: 429 Too Many Requests when accessing https://www.instagram.com/api/v1/users/web_profile_info/?username=arina_alexx_expert
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/proof-map/collect/reels_collect.py", line 130, in <module>
+    main()
+    ~~~~^^
+  File "/data/data/com.termux/files/home/proof-map/collect/reels_collect.py", line 115, in main
+    con.execute("INSERT OR REPLACE INTO profiles VALUES(?,?,?,?,?,?,?)",
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                (u, None, None, None, None,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 datetime.now().isoformat(timespec="seconds"),
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 "fail: " + msg[:80]))
+                 ^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: attempt to write a readonly database

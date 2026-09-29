@@ -7,6 +7,27 @@ window.NICHES = {
   faceless_youtube: {
     name: 'faceless YouTube (ИИ-каналы)',
     claims: [
+      // ── КОНКУРЕНТЫ · реальные формулировки с сайтов (снято 29.09.2026) ──
+      { id: 'c1', branch: 'rules', text: 'Арина Алекс обещает «выйти на доход от 100к до 1 млн» на блоге',
+        type: 'platform_docs', claimPower: 10, n: 0,
+        sources: [{ w: 5, kind: 'vendor', title: 'stepbybit.ru — оферта', url: 'https://stepbybit.ru' }],
+        objection: 'Обещание на 89–169 тыс ₽ без единого кейса ученика с проверяемой цифрой' },
+      { id: 'c2', branch: 'rules', text: 'Арина Алекс: «Многие ученики зарабатывают от 50-60к сразу после курса с нуля»',
+        type: 'self_report', claimPower: 9, n: 0,
+        sources: [{ w: 5, kind: 'vendor', title: 'stepbybit.ru — оферта', url: 'https://stepbybit.ru' }],
+        objection: 'Слово «многие» — не выборка. Сколько из сотен? Не указано' },
+      { id: 'c3', branch: 'rules', text: 'Reels Machine обещает 600 000 – 1 000 000 ₽ выручки в месяц по договорам',
+        type: 'self_report', claimPower: 10, n: 0,
+        sources: [{ w: 1, kind: 'self_report', title: 'wake-up-marketing.ru', url: 'https://wake-up-marketing.ru/instrumenty/reels-machine' }],
+        objection: 'Цифра в 20 раз выше, чем у всех остальных. Без договора в тексте' },
+      { id: 'c4', branch: 'rules', text: 'Цена Арины Алекс выросла в 2,5 раза за год: 56 700 ₽ (2023) → 85–139 000 ₽ (2026)',
+        type: 'platform_docs', claimPower: 8, n: 0,
+        sources: [{ w: 5, kind: 'vendor', title: 'Каталог 2023 vs лендинг 2026', url: 'https://onlinekursbest.ru/reels' }],
+        objection: 'Рост цены не доказывает рост ценности — возможна смена сегмента' },
+      { id: 'c5', branch: 'rules', text: 'Полина Зиновьева собирает 116 865 комментариев на 12 рилсах (4,16 млн просмотров)',
+        type: 'platform_docs', claimPower: 10, n: 12,
+        sources: [{ w: 10, kind: 'platform_docs', title: 'Instagram, снято рендером 29.09.2026', url: 'https://instagram.com/polly_zinovieva' }],
+        objection: 'Работает потому, что просит написать слово. Не переносится на продукт без такого приёма' },
       // ── РЫНОК ──
       { id: 'm1', branch: 'market', text: 'Спрос на ИИ-видеоконтент растёт год от года',
         type: 'data', claimPower: 7, n: 0,
