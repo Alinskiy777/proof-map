@@ -91,6 +91,20 @@
     <div id="chartStrength"></div>
   </div>
 
+  <div class="panel">
+    <h2>Вес источника <span class="tag n">потолок доказательности</span></h2>
+    <p class="note">Сила доказательства ограничена типом источника (модель из карты конкурентов).
+    Вендор с коммерческим интересом не может дать силу выше 5 — сколько бы ни обещал.</p>
+    <table id="tblWeights"><thead><tr><th>Источник</th><th class="num">Потолок</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="panel">
+    <h2>Платформа и пресса <span class="tag n" id="tagCP"></span></h2>
+    <p class="note">Самые сильные доказательства ниши: справка YouTube (юридически обязывает),
+    проверенная пресса, интервью владельцев, вендор. Опровергнутое — отдельно.</p>
+    <div id="cpList"></div>
+  </div>
+
   <div class="panel alert">
     <h2>Пробелы <span class="tag r" id="tagGaps"></span></h2>
     <p class="note">Чего не хватает для полноценной карты. Честный статус, не оптимизм.</p>
@@ -101,6 +115,7 @@
 <script src="data/types.js"></script>
 <script src="data/proofs.js"></script>
 <script src="data/competitors.js"></script>
+<script src="data/competitor-proof.js"></script>
 <script>
 const T = window.PROOF_TYPES, P = window.PROOFS, C = window.COMPETITORS || [];
 const keys = Object.keys(T);
@@ -120,11 +135,24 @@ keys.forEach(k => (P[k]||[]).forEach(p => {
   srcMap[key] = (srcMap[key]||0)+1;
 }));
 const srcs = Object.entries(srcMap).sort((a,b)=>b[1]-a[1]);
-const strBuckets = { '8-10':0,'5-7':0,'1-4':0 };
+const bucketOf = s => s>=8?'8-10':s>=5?'5-7':'1-4';
+// Потолок доказательности по типу источника (модель из карты конкурентов):
+// вендор с коммерческим интересом не может дать >5, первоисточник (справка
+// платформы/Бенчивенга) — до 10.
+const tierOf = p => {
+  const s=(p.source||'').toLowerCase();
+  if(/launchpad|art of youtube|faceless channels/.test(s)) return 5;
+  if(/bencivenga|bejakovic/.test(s)) return 10;
+  return 6;
+};
+const strBuckets = { '8-10':0,'5-7':0,'1-4':0 };   // как оценено
+const capBuckets = { '8-10':0,'5-7':0,'1-4':0 };   // с потолком источника
 keys.forEach(k => (P[k]||[]).forEach(p => {
-  const s = p.strength||0;
-  if (s>=8) strBuckets['8-10']++; else if (s>=5) strBuckets['5-7']++; else strBuckets['1-4']++;
+  const s = p.strength||0, t = tierOf(p);
+  strBuckets[bucketOf(s)]++;
+  capBuckets[bucketOf(Math.min(s,t))]++;
 }));
+const overRated = keys.reduce((n,k)=>n+(P[k]||[]).filter(p=>(p.strength||0)>tierOf(p)).length,0);
 const maxC = Math.max(1,...counts.map(c=>c.n));
 
 // Уникальные доказательства (Бенчивенга: один пласт можно наложить на другой тип,
@@ -169,12 +197,47 @@ document.querySelector('#tblComp tbody').innerHTML = C.map(x=>
   `<tr><td><b>${x.name}</b><div class="mono">${x.url||''}</div></td><td>${x.funnel||'—'}</td><td>${x.offer||'—'}</td><td class="mono">${x.price||'—'}</td><td>${(x.proofs||[]).length?`<span class="tag g">${x.proofs.length} док.</span>`:'<span class="tag a">нет</span>'}</td></tr>`).join('')
   || '<tr><td colspan="5" class="empty">нет данных по конкурентам</td></tr>';
 
-document.getElementById('chartStrength').innerHTML = Object.entries(strBuckets).map(([k,n])=>
-  `<div style="display:flex;align-items:center;gap:12px;margin-bottom:7px">
+document.getElementById('chartStrength').innerHTML = Object.entries(capBuckets).map(([k,n])=>{
+  const raw = strBuckets[k];
+  return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:7px">
     <div style="width:70px;font-size:13px;color:var(--dim)">${k}</div>
     <div class="bar" style="flex:1"><i style="width:${(n/Math.max(1,total)*100).toFixed(1)}%;background:${k==='8-10'?'var(--green)':k==='5-7'?'var(--amber)':'var(--red)'}"></i></div>
-    <div class="num mono" style="width:56px">${n}</div>
-  </div>`).join('');
+    <div class="num mono" style="width:130px">${n} <span style="color:var(--dim2);font-size:11px">/ было ${raw}</span></div>
+  </div>`;
+}).join('') + `<p class="note" style="color:var(--red);margin-top:8px">⚠️ С потолком источника 8–10 дают только <b>${capBuckets['8-10']}</b> доказательств (первоисточники). <b>${overRated}</b> из ${total} были завышены — вендор с коммерческим интересом не может дать больше 5.</p>`;
+
+// ── вес источника + платформа/пресса ──
+const CP = window.COMPETITOR_PROOF || { sourceWeights:{}, items:[] };
+const SW = CP.sourceWeights || {};
+const cpItems = CP.items || [];
+const swOrder = Object.keys(SW).sort((a,b)=>(SW[b].w||0)-(SW[a].w||0));
+document.querySelector('#tblWeights tbody').innerHTML = swOrder.map(k=>
+  `<tr><td>${SW[k].name}</td><td class="num"><b>${SW[k].w}</b>/10</td><td><div class="bar"><i style="width:${SW[k].w*10}%;background:${SW[k].w>=8?'var(--green)':SW[k].w>=5?'var(--amber)':'var(--red)'}"></i></div></td></tr>`).join('')
+  || '<tr><td colspan="3" class="empty">нет модели веса</td></tr>';
+
+const isRefuted = x => /ОПРОВЕРГНУТО/.test(String(x.verified||''));
+const cpSolid = cpItems.filter(x=>!isRefuted(x));
+const cpBad = cpItems.filter(isRefuted);
+document.getElementById('tagCP').textContent = cpSolid.length+' подтверждено · '+cpBad.length+' опровергнуто';
+const cpHtml = list => list.map(x=>{
+  const w=(SW[x.src]||{}).w||0;
+  const col = w>=8?'var(--green)':w>=5?'var(--amber)':'var(--red)';
+  return `<div class="proof" style="--pc:${col}">
+    <div class="q">${x.claim||x.quote||''}</div>
+    <div class="row">
+      <span class="tag t-str">вес ${w}/10</span>
+      ${x.n?`<span class="tag t-n">n=${x.n}</span>`:''}
+      <span class="tag t-src">${(SW[x.src]||{}).name||x.src}</span>
+      ${x.url?`<a class="tag t-url" href="${x.url}" target="_blank" rel="noopener">${String(x.url).replace(/^https?:\/\//,'').slice(0,55)}</a>`:''}
+    </div>
+    ${x.quote?`<div style="margin-top:7px;font-size:12.5px;color:var(--dim)">«${x.quote}»</div>`:''}
+    ${x.note?`<div class="note">${x.note}</div>`:''}
+  </div>`;
+}).join('');
+document.getElementById('cpList').innerHTML =
+  (cpSolid.length?cpHtml(cpSolid):'') +
+  (cpBad.length?`<p class="note" style="margin-top:14px"><b>Опровергнутое — не использовать:</b></p>`+cpHtml(cpBad):'')
+  || '<p class="note">нет данных</p>';
 
 const gaps = counts.filter(c=>c.n<10).map(c=>`№${c.t.n} ${c.t.name} — ${c.n}`);
 document.getElementById('tagGaps').textContent = gaps.length+' дыр';

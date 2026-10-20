@@ -33,6 +33,15 @@ function layout() {
 
 function proofCount(k) { return (PROOFS[k] || []).length; }
 
+// Потолок доказательности по типу источника (модель из карты конкурентов).
+// Вендор с коммерческим интересом не может дать >5, первоисточник — до 10.
+function tierOf(p) {
+  const s = (p.source || '').toLowerCase();
+  if (/launchpad|art of youtube|faceless channels/.test(s)) return 5;
+  if (/bencivenga|bejakovic/.test(s)) return 10;
+  return 6;
+}
+
 function render() {
   const nodes = layout();
   canvas.querySelectorAll('.node').forEach(n => n.remove());
@@ -98,11 +107,13 @@ function openType(key) {
     srcs[k] = (srcs[k] || 0) + 1;
   });
   const topSrc = Object.entries(srcs).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const avg = list.length ? (list.reduce((s, p) => s + (p.strength || 0), 0) / list.length).toFixed(1) : '—';
+  const avg = list.length ? (list.reduce((s, p) => s + Math.min(p.strength || 0, tierOf(p)), 0) / list.length).toFixed(1) : '—';
+  const over = list.filter(p => (p.strength || 0) > tierOf(p)).length;
 
   document.getElementById('pChips').innerHTML =
     `<span class="chip">доказательств: <b>${list.length}</b></span>` +
     `<span class="chip">средняя сила: <b>${avg}</b></span>` +
+    (over ? `<span class="chip" style="border-color:var(--red);color:var(--red)">завышено: <b>${over}</b></span>` : '') +
     `<span class="chip">цвет: <b style="color:${t.color}">●</b></span>` +
     (topSrc.length ? `<span class="chip">источники: <b>${topSrc.map(s => s[0]).join(', ')}</b></span>` : '');
 
@@ -110,17 +121,21 @@ function openType(key) {
   if (!list.length) {
     box.innerHTML = `<div class="empty">Пока нет доказательств этого типа.<br><b>Собираем — дип-ресерч в работе.</b></div>`;
   } else {
-    box.innerHTML = list.map(p => `
+    box.innerHTML = list.map(p => {
+      const _t = tierOf(p), _s = p.strength || 0, _c = Math.min(_s, _t);
+      const strTag = _s ? `<span class="tag t-str">сила ${_c}/10${_s > _t ? ` <span style="opacity:.65;font-size:10px">оцен.${_s}→потолок ${_t}</span>` : ''}</span>` : '';
+      return `
       <div class="proof" style="--pc:${t.color}">
         <div class="q">${p.q}</div>
         <div class="row">
-          ${p.strength ? `<span class="tag t-str">сила ${p.strength}/10</span>` : ''}
+          ${strTag}
           ${p.n ? `<span class="tag t-n">n=${p.n}</span>` : ''}
           ${p.source ? `<span class="tag t-src">${p.source}</span>` : ''}
           ${p.url ? `<a class="tag t-url" href="${p.url}" target="_blank" rel="noopener">${String(p.url).replace(/^https?:\/\//, '').slice(0, 60)}</a>` : ''}
         </div>
         ${p.note ? `<div class="note">${p.note}</div>` : ''}
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
   panel.classList.add('on');
 }

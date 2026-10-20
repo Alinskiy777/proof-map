@@ -147,7 +147,7 @@ window.PROOFS = {
   logical_foundation: [
     { q: '«If you\'ve got 20 minutes a month, I guarantee to work a financial miracle» — цепочка «время → гарантия → результат»', source: 'Bencivenga, Marketing Bullets (буллет 3)', url: 'https://nordiccopy.com/bencivenga-bullets/', strength: 9, n: 0, note: 'Первоисточник: два самых мощных слова.' },
     { q: '«advertising doesn\'t create a product advantage, it can only convey it» — логическое основание', source: 'Bencivenga, Marketing Bullets (буллет 19)', url: 'https://nordiccopy.com/bencivenga-bullets/', strength: 9, n: 0, note: 'Почему сначала продукт, потом текст.' },
-    { q: '«If the glove don\'t fit, you must acquit» — логическая конструкция как основание', source: 'Bencivenga Archives (фрагмент 35)', url: 'https://bejakovic.com/', strength: 7, n: 0, note: 'Co-opting phrase как логическое основание.' },
+    { q: '«If the glove don\'t fit, you must acquit» — кооптинг известной фразы (рифма)', source: 'Архивы Бенчивенги: 12 sticky disciples №11', url: 'https://bejakovic.com/', strength: 5, n: 0, note: 'Ось «липкость», не оффера. Архив, строка 141. Переклассифицировано из «логического фундамента» — это не логика, а языковой приём.' },
   ],
 
   // ── 17. ЯРКАЯ КАРТИНА ──
@@ -188,7 +188,7 @@ window.PROOFS = {
 
   // ── 23. НАУЧНЫЕ ИССЛЕДОВАНИЯ ──
   scientific_research: [
-    { q: '«38% stickier than the average» — MIT-исследование запоминаемости', source: 'Bencivenga Archives (фрагмент 8)', url: 'https://bejakovic.com/', strength: 9, n: 0, note: 'Единственная научная ссылка в первоисточнике. n не указан — провал доказательности.' },
+    { q: '«38% stickier than the average» — MIT о запоминаемости рифмы/кооптинга', source: 'Архивы Бенчивенги: 12 sticky disciples №11', url: 'https://bejakovic.com/', strength: 5, n: 0, note: 'Ось «липкость», не оффера: наука о запоминаемости приёма. Архив, строка 127. Научная ссылка есть, но она про приём, а не про продукт.' },
     { q: '«The secret "trigger word" alluded to in the headline is "because"» — эксперимент Ellen Langer (Harvard): 60% → 93%', source: 'Bencivenga, Marketing Bullets (буллет 10)', url: 'https://nordiccopy.com/bencivenga-bullets/', strength: 9, n: 0, note: 'Классический психологический эксперимент.' },
     { q: '«people in the queue to the copy machine» — три варианта просьбы (60% / 93% / 93%)', source: 'Bencivenga, Marketing Bullets (буллет 10)', url: 'https://nordiccopy.com/bencivenga-bullets/', strength: 8, n: 0, note: 'Эксперимент с тремя условиями.' },
   ],
