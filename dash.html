@@ -116,8 +116,11 @@
 <script src="data/proofs.js"></script>
 <script src="data/competitors.js"></script>
 <script src="data/competitor-proof.js"></script>
+<script src="data/platform-proofs.js"></script>
 <script>
 const T = window.PROOF_TYPES, P = window.PROOFS, C = window.COMPETITORS || [];
+// Добор: смонтировать проверенные цитаты (platform-proofs.js) в типы Бенчивенги.
+if (window.PLATFORM_PROOFS) Object.keys(window.PLATFORM_PROOFS).forEach(k => { P[k] = (P[k] || []).concat(window.PLATFORM_PROOFS[k]); });
 const keys = Object.keys(T);
 const counts = keys.map(k => ({ k, n: (P[k]||[]).length, t: T[k] }));
 const total = counts.reduce((s,c)=>s+c.n,0);
@@ -141,8 +144,12 @@ const bucketOf = s => s>=8?'8-10':s>=5?'5-7':'1-4';
 // платформы/Бенчивенга) — до 10.
 const tierOf = p => {
   const s=(p.source||'').toLowerCase();
-  if(/launchpad|art of youtube|faceless channels/.test(s)) return 5;
-  if(/bencivenga|bejakovic/.test(s)) return 10;
+  if(/справка youtube|bencivenga|bejakovic|архивы бенчивенги/.test(s)) return 10;   // платформа/первоисточник
+  if(/fortune/.test(s)) return 8;                                               // проверенная пресса
+  if(/интервью|vidiq|business insider|hollywood reporter|thenextweb|подкаст/.test(s)) return 6;
+  if(/launchpad|art of youtube|faceless channels|вендор/.test(s)) return 5;      // вендор
+  if(/seo|seofarm/.test(s)) return 3;                                           // SEO-ферма
+  if(/reddit|форум|аноним|самоотчёт|selfreport/.test(s)) return 1;              // самоотчёт/форум
   return 6;
 };
 const strBuckets = { '8-10':0,'5-7':0,'1-4':0 };   // как оценено

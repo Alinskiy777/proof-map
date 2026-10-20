@@ -37,9 +37,20 @@ function proofCount(k) { return (PROOFS[k] || []).length; }
 // Вендор с коммерческим интересом не может дать >5, первоисточник — до 10.
 function tierOf(p) {
   const s = (p.source || '').toLowerCase();
-  if (/launchpad|art of youtube|faceless channels/.test(s)) return 5;
-  if (/bencivenga|bejakovic/.test(s)) return 10;
+  if (/справка youtube|bencivenga|bejakovic|архивы бенчивенги/.test(s)) return 10;
+  if (/fortune/.test(s)) return 8;
+  if (/интервью|vidiq|business insider|hollywood reporter|thenextweb|подкаст/.test(s)) return 6;
+  if (/launchpad|art of youtube|faceless channels|вендор/.test(s)) return 5;
+  if (/seo|seofarm/.test(s)) return 3;
+  if (/reddit|форум|аноним|самоотчёт|selfreport/.test(s)) return 1;
   return 6;
+}
+
+// Добор: смонтировать проверенные цитаты (platform-proofs.js) в типы Бенчивенги.
+if (window.PLATFORM_PROOFS) {
+  Object.keys(window.PLATFORM_PROOFS).forEach(k => {
+    PROOFS[k] = (PROOFS[k] || []).concat(window.PLATFORM_PROOFS[k]);
+  });
 }
 
 function render() {
