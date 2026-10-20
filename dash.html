@@ -79,6 +79,14 @@
     <table id="tblSources"><thead><tr><th>Источник</th><th class="num">Доказательств</th><th></th></tr></thead><tbody></tbody></table>
   </div>
 
+  <div class="panel alert">
+    <h2>Честность подсчёта <span class="tag a" id="tagHonest"></span></h2>
+    <p class="note">Дьявол-аудит: <b>вхождения ≠ независимые факты</b>. Один факт Бенчивенга разрешает
+    накладывать на несколько типов, но считать его дважды — это инфляция счётчика. Ниже —
+    реальная плотность карты: сколько РАЗНЫХ фактов и ссылок за числом.</p>
+    <table id="tblHonest"><thead><tr><th>Метрика</th><th class="num">Значение</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+
   <div class="panel">
     <h2>Конкуренты: воронки и офферы</h2>
     <p class="note">Разведка трёх приоритетных игроков ниши.</p>
@@ -199,6 +207,31 @@ document.getElementById('chartTypes').innerHTML = counts.map(c=>{
 document.querySelector('#tblSources tbody').innerHTML = srcs.map(([s,n])=>
   `<tr><td>${s}</td><td class="num">${n}</td><td><div class="bar"><i style="width:${(n/srcs[0][1]*100).toFixed(1)}%;background:var(--blue)"></i></div></td></tr>`).join('')
   || '<tr><td colspan="3" class="empty">нет источников</td></tr>';
+
+// ── честность подсчёта (дьявол-аудит, v0.4) ──
+const flatP = [];
+keys.forEach(k => (P[k] || []).forEach(p => flatP.push({ ...p, type: k })));
+const uniqUrl = new Set(flatP.filter(p => p.url).map(p => p.url)).size;
+const noUrlN = flatP.filter(p => !p.url).length;
+const vendorN = flatP.filter(p => p.url && /facelesslaunchpad|theartofyt|facelesschannels/i.test(p.url)).length;
+const byQ = {};
+flatP.forEach(p => { const q = p.q.slice(0, 45); (byQ[q] = byQ[q] || []).push(p.type); });
+const stretched = Object.values(byQ).filter(t => t.length > 1);
+const stretchExtra = stretched.reduce((a, t) => a + (t.length - 1), 0);
+const top3 = srcs.slice(0, 3).reduce((a, [, n]) => a + n, 0);
+const pc = n => Math.round(n / total * 100) + '%';
+const honest = [
+  ['Вхождений (сырых)', total, '', ''],
+  ['Уникальных фактов', unique, 'инфляция x' + (total / Math.max(1, unique)).toFixed(2), ''],
+  ['Уникальных ссылок (URL)', uniqUrl, 'столько страниц за всей картой', 'r'],
+  ['Без ссылки', noUrlN, 'непроверяемо', 'r'],
+  ['Вендорские источники (потолок 5)', vendorN, pc(vendorN) + ' карты', 'r'],
+  ['Топ-3 источника', top3, pc(top3) + ' карты', 'r'],
+  ['Один факт в 2–3 типах', stretched.length, '+' + stretchExtra + ' лишних вхождений', 'r'],
+];
+document.querySelector('#tblHonest tbody').innerHTML = honest.map(([l, v, f, c]) =>
+  `<tr><td class="${c === 'r' ? 'r' : ''}">${l}</td><td class="num ${c === 'r' ? 'r' : ''}">${v}</td><td style="color:var(--dim);font-size:12px">${f}</td></tr>`).join('');
+document.getElementById('tagHonest').textContent = unique + ' фактов / ' + uniqUrl + ' ссылок';
 
 document.querySelector('#tblComp tbody').innerHTML = C.map(x=>
   `<tr><td><b>${x.name}</b><div class="mono">${x.url||''}</div></td><td>${x.funnel||'—'}</td><td>${x.offer||'—'}</td><td class="mono">${x.price||'—'}</td><td>${(x.proofs||[]).length?`<span class="tag g">${x.proofs.length} док.</span>`:'<span class="tag a">нет</span>'}</td></tr>`).join('')
