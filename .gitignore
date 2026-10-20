@@ -1,0 +1,2 @@
+# runtime guard state (перезаписывается каждые 60 сек)
+live-status.json

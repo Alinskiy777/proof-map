@@ -1,142 +1,191 @@
-// ═══ КАРТА ДОКАЗАТЕЛЬСТВ · ДВИЖОК v0.1 ═══
-// Один файл. Без зависимостей. GitHub Pages.
-// Принцип: движок детерминирован, ИИ — необязательный слой поверх.
-// Узел = утверждение (claim) + тип доказательства + сила + статус поддержки.
+// ═══ КАРТА ДОКАЗАТЕЛЬСТВ · ДВИЖОК v1.0 ═══
+// Холст в стиле Miro: тёмный, сетка-точки, узлы-плитки, линии от центра.
+// Пан/зум мышью. Клик по узлу → панель с доказательствами этого типа.
 (() => {
 'use strict';
 
-const TAXONOMY = {
-  authentic:  { name: 'Аутентичность',    color: '#8b5cf6', note: 'кто ты и почему тебе верить' },
-  result:     { name: 'Результат',        color: '#22c55e', note: 'что получилось у других' },
-  market:     { name: 'Рынок',            color: '#06b6d4', note: 'спрос, размер, поведение людей' },
-  product:    { name: 'Продукт/метод',    color: '#eab308', note: 'как это работает технически' },
-  economics:  { name: 'Экономика',        color: '#f97316', note: 'деньги, затраты, возврат' },
-  risk:       { name: 'Риск и обратимость', color: '#ef4444', note: 'что будет, если не сработает' },
-  rules:      { name: 'Правила платформы', color: '#06b6d4', note: 'что YouTube разрешает и запрещает' },
-  process:    { name: 'Процесс',          color: '#84cc16', note: 'шаги, повторяемость' },
-  witness:    { name: 'Свидетельства',    color: '#3b82f6', note: 'сторонние источники' },
-};
+const TYPES = window.PROOF_TYPES || {};
+const PROOFS = window.PROOFS || {};
+const ORDER = window.PROOF_TYPE_ORDER || Object.keys(TYPES);
 
-const STRENGTH = {
-  platform_docs: { w: 10, name: 'Справка платформы' },
-  verified_press:{ w: 8,  name: 'Пресса с проверкой документов' },
-  named_press:   { w: 6,  name: 'Отраслевая пресса' },
-  interview:     { w: 6,  name: 'Интервью/подкаст' },
-  vendor:        { w: 5,  name: 'Вендор' },
-  seofarm:       { w: 3,  name: 'SEO-ферма' },
-  research:   { w: 9, name: 'Научное исследование' },
-  demo:       { w: 8, name: 'Живая демонстрация' },
-  endorse:    { w: 8, name: 'Рекомендация авторитета' },
-  case:       { w: 7, name: 'Кейс с цифрами' },
-  regulatory: { w: 10, name: 'Регулятор / госреестр' },
-  market:     { w: 6, name: 'Рыночная статистика' },
-  track:      { w: 7, name: 'Собственный track record' },
-  pattern:    { w: 7, name: 'Повторяющийся паттерн' },
-  proven:     { w: 7, name: 'Доказанный результат' },
-  compare:    { w: 6, name: 'Сравнение' },
-  expert:     { w: 6, name: 'Статус эксперта' },
-  reason:     { w: 6, name: 'Reasons-why' },
-  candor:     { w: 5, name: 'Честность' },
-  testimonial:{ w: 5, name: 'Отзыв' },
-  data:       { w: 6, name: 'Данные' },
-  outrage:    { w: 4, name: 'Провокация' },
-  rhyme:      { w: 3, name: 'Языковая форма' },
-};
+const canvas = document.getElementById('canvas');
+const stage  = document.getElementById('stage');
+const svg    = document.getElementById('links');
+const panel  = document.getElementById('panel');
 
-// ═══ ПРОВЕРКА ЧЕСТНОСТИ ═══
-// claim ≤ proof. Если сила доказательства ниже силы утверждения —
-// Бенчивенга: «Never make your claim bigger than your proof».
-function auditClaim(c) {
-  const claimPower = c.claimPower || 5;   // насколько сильное само утверждение
-  const proofPower = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
-  if (claimPower > proofPower) {
-    return { ok: false, gap: proofPower - claimPower,
-             msg: `Утверждение (${claimPower}) сильнее доказательства (${proofPower}) — «Yeah, sure»` };
-  }
-  if (!c.sources || c.sources.length === 0) {
-    return { ok: false, gap: 4, msg: 'Нет ни одного источника — утверждение голословное' };
-  }
-  if (c.sources.some(s => s.n === undefined || s.n === null)) {
-    return { ok: true, warn: 'У источника не указан размер выборки (n) — цифра недоказуема' };
-  }
-  return { ok: true };
-}
+let view = { x: 0, y: 0, k: 1 };
 
-/** Риск дыры: насколько утверждение «выше» доказательства + насколько оно громкое.
- *  0 — дыры нет. Больше — опаснее. Сортировка «Пробелов» идёт по нему. */
-function riskOf(c) {
-  const a = auditClaim(c);
-  if (a.ok && !a.warn) return 0;
-  const w = STRENGTH[c.type] ? STRENGTH[c.type].w : 3;
-  const overclaim = Math.max(0, (c.claimPower || 5) - w);   // голос выше доказательства
-  const hollow   = (!c.sources || !c.sources.length) ? 3 : 0; // голословное вообще
-  // 🔴 «Нет n» штрафует ТОЛЬКО статистику. Справка платформы и пресса с проверкой
-  //    документов — не выборка, им n неприменима. Иначе доказанное правило
-  //    YouTube получало бы штраф за отсутствие того, чего у него быть не может.
-  const SAMPLE_TYPES = ['platform_docs', 'verified_press', 'named_press'];
-  const kind = sourceKind({ type: c.type, url: c.sources && c.sources[0] && c.sources[0].url });
-  const noN = (!SAMPLE_TYPES.includes(kind) &&
-               (c.sources || []).some(s => s.n === undefined || s.n === null)) ? 1 : 0;
-  // 🔴 Давление реальности: сколько живых людей в Reddit бьют именно в это утверждение.
-  //    Новый член (дип-луп 9). Считается из OBJECTIONS.clusters[].hits.
-  const pushback = (window.OBJECTIONS ? objectionLoad(c.id) : 0);
-  return overclaim * 2 + hollow * 2 + noN + pushback;
-}
+// ── геометрия: узлы по спирали вокруг центра ──
+const W = 1800, H = 1200, CX = W / 2, CY = H / 2;
 
-/** Суммарное давление реальности на утверждение: частота×сила по всем кластерам,
- *  которые бьют в него. 0 = никто не возражал. */
-function objectionLoad(claimId) {
-  if (!window.OBJECTIONS) return 0;
-  let load = 0;
-  window.OBJECTIONS.clusters.forEach(k => {
-    if (k.hits && k.hits.indexOf(claimId) !== -1) {
-      // нормируем частоту на 100 комментариев, чтобы «22 из 178» и «2 из 178» были сравнимы
-      const per100 = Math.round((k.count / k.sample) * 100);
-      load += Math.round(per100 * k.power / 10);   // сила вносит вес
-    }
+function layout() {
+  const keys = ORDER.filter(k => TYPES[k]);
+  const nodes = [{ key: '__root__', x: CX, y: CY }];
+  const R0 = 250, STEP = 120;
+  keys.forEach((k, i) => {
+    const ring = Math.floor(i / 9);
+    const ang = ((i % 9) / 9) * Math.PI * 2 - Math.PI / 2;
+    const r = R0 + ring * STEP;
+    nodes.push({ key: k, x: CX + Math.cos(ang) * r, y: CY + Math.sin(ang) * r * 0.82 });
   });
-  return load;
+  return nodes;
 }
 
-/** Все кластеры возражений, бьющих в это утверждение, с их реальными цитатами. */
-function objectionsFor(claimId) {
-  if (!window.OBJECTIONS) return [];
-  return window.OBJECTIONS.clusters.filter(k => k.hits && k.hits.indexOf(claimId) !== -1);
+function proofCount(k) { return (PROOFS[k] || []).length; }
+
+function render() {
+  const nodes = layout();
+  canvas.querySelectorAll('.node').forEach(n => n.remove());
+  svg.innerHTML = '';
+
+  const root = nodes[0];
+  nodes.slice(1).forEach(n => {
+    const t = TYPES[n.key];
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const dx = n.x - root.x, dy = n.y - root.y;
+    const mx = root.x + dx * 0.5 - dy * 0.08;
+    const my = root.y + dy * 0.5 + dx * 0.08;
+    p.setAttribute('d', `M${root.x},${root.y} Q${mx},${my} ${n.x},${n.y}`);
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', t ? t.color : '#58a6ff');
+    p.setAttribute('stroke-width', '1.4');
+    p.setAttribute('opacity', '0.32');
+    svg.appendChild(p);
+  });
+
+  const total = ORDER.reduce((s, k) => s + proofCount(k), 0);
+  document.getElementById('rootSub').textContent =
+    `${ORDER.length} типов · ${total} доказательств`;
+
+  nodes.slice(1).forEach(n => {
+    const t = TYPES[n.key];
+    if (!t) return;
+    const c = proofCount(n.key);
+    const el = document.createElement('div');
+    el.className = 'node';
+    el.style.left = n.x + 'px';
+    el.style.top  = n.y + 'px';
+    el.style.setProperty('--nc', t.color);
+    el.dataset.key = n.key;
+    el.innerHTML =
+      `<div class="num">№${t.n}</div>` +
+      `<div class="nm">${t.name}</div>` +
+      `<div class="en">${t.en}</div>` +
+      `<div class="cnt">${c}</div>` +
+      `<div class="src">${t.src}</div>`;
+    el.addEventListener('click', (e) => { e.stopPropagation(); openType(n.key); });
+    canvas.appendChild(el);
+  });
+
+  const rn = document.getElementById('rootNode');
+  rn.style.left = CX + 'px';
+  rn.style.top  = CY + 'px';
 }
 
-/** Вес источника по Бенчивенге: какое доказательство вообще способен дать этот тип
- *  источника. Справка платформы = 10, самоотчёт в соцсети = 1.
- *  Это ЗАКРЫВАЕТ долг «Trustpilot ≠ NYT»: вес задаётся типом источника, не автором. */
-function sourceWeight(s) {
-  if (!s || !s.src) return 5;
-  const T = (window.COMPETITOR_PROOF || {}).sourceWeights || {};
-  return (T[s.src] || { w: 5 }).w;
+// ── панель ──
+function openType(key) {
+  const t = TYPES[key];
+  const list = PROOFS[key] || [];
+  canvas.querySelectorAll('.node').forEach(n => n.classList.toggle('sel', n.dataset.key === key));
+
+  document.getElementById('pTitle').textContent = `№${t.n} · ${t.name}`;
+  document.getElementById('pMeta').textContent = `${t.en} · ${t.src} · ${t.note}`;
+
+  const srcs = {};
+  list.forEach(p => {
+    const u = p.url || p.source || '';
+    const k = u.replace(/^https?:\/\//, '').split('/')[0] || 'без ссылки';
+    srcs[k] = (srcs[k] || 0) + 1;
+  });
+  const topSrc = Object.entries(srcs).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const avg = list.length ? (list.reduce((s, p) => s + (p.strength || 0), 0) / list.length).toFixed(1) : '—';
+
+  document.getElementById('pChips').innerHTML =
+    `<span class="chip">доказательств: <b>${list.length}</b></span>` +
+    `<span class="chip">средняя сила: <b>${avg}</b></span>` +
+    `<span class="chip">цвет: <b style="color:${t.color}">●</b></span>` +
+    (topSrc.length ? `<span class="chip">источники: <b>${topSrc.map(s => s[0]).join(', ')}</b></span>` : '');
+
+  const box = document.getElementById('pList');
+  if (!list.length) {
+    box.innerHTML = `<div class="empty">Пока нет доказательств этого типа.<br><b>Собираем — дип-ресерч в работе.</b></div>`;
+  } else {
+    box.innerHTML = list.map(p => `
+      <div class="proof" style="--pc:${t.color}">
+        <div class="q">${p.q}</div>
+        <div class="row">
+          ${p.strength ? `<span class="tag t-str">сила ${p.strength}/10</span>` : ''}
+          ${p.n ? `<span class="tag t-n">n=${p.n}</span>` : ''}
+          ${p.source ? `<span class="tag t-src">${p.source}</span>` : ''}
+          ${p.url ? `<a class="tag t-url" href="${p.url}" target="_blank" rel="noopener">${String(p.url).replace(/^https?:\/\//, '').slice(0, 60)}</a>` : ''}
+        </div>
+        ${p.note ? `<div class="note">${p.note}</div>` : ''}
+      </div>`).join('');
+  }
+  panel.classList.add('on');
 }
 
-/** Сила наших источников по утверждению: берём самый сильный, а не сумму.
- *  Сумма была бы накруткой — десять слабых цитат не дают сильного доказательства. */
-/** Ищет тип доказательства по URL — связывает утверждение с базой COMPETITOR_PROOF. */
-function sourceKind(s) {
-  if (!s) return null;
-  if (s.src) return s.src;
-  const db = (window.COMPETITOR_PROOF || {}).items || [];
-  const byUrl = s.url && db.find(x => x.url === s.url);
-  if (byUrl) return byUrl.src;
-  // иначе — по типу самого утверждения (platform_docs и т.п. живут в STRENGTH)
-  return s.type || null;
+function closePanel() {
+  panel.classList.remove('on');
+  canvas.querySelectorAll('.node').forEach(n => n.classList.remove('sel'));
 }
 
-function bestSource(sources) {
-  if (!sources || !sources.length) return 0;
-  return Math.max.apply(null, sources.map(x => {
-    const k = sourceKind(x);
-    if (!k) return 5;                       // источник есть, тип неизвестен → нейтрально
-    if (STRENGTH[k]) return STRENGTH[k].w;  // справка платформы = 10
-    return sourceWeight({ src: k });        // пресса/вендор/интервью
-  }));
+// ── пан/зум ──
+function apply() {
+  canvas.style.transform = `translate(${view.x}px,${view.y}px) scale(${view.k})`;
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+}
+function resetView() {
+  const r = stage.getBoundingClientRect();
+  view.k = Math.min(r.width / (W * 0.92), r.height / (H * 0.92));
+  view.k = Math.max(0.28, Math.min(view.k, 1.1));
+  view.x = (r.width  - W * view.k) / 2;
+  view.y = (r.height - H * view.k) / 2 + 20;
+  apply();
+}
+window.resetView = resetView;
+window.closePanel = closePanel;
+
+stage.addEventListener('mousedown', e => {
+  if (e.target.closest('.node')) return;
+  stage.classList.add('drag');
+  const sx = e.clientX - view.x, sy = e.clientY - view.y;
+  const mv = ev => { view.x = ev.clientX - sx; view.y = ev.clientY - sy; apply(); };
+  const up = () => { stage.classList.remove('drag'); window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+  window.addEventListener('mousemove', mv);
+  window.addEventListener('mouseup', up);
+});
+stage.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = stage.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const f = e.deltaY < 0 ? 1.12 : 0.89;
+  const k2 = Math.max(0.22, Math.min(2.4, view.k * f));
+  view.x = mx - (mx - view.x) * (k2 / view.k);
+  view.y = my - (my - view.y) * (k2 / view.k);
+  view.k = k2;
+  apply();
+}, { passive: false });
+canvas.addEventListener('click', closePanel);
+
+// ── статистика и легенда ──
+function renderStats() {
+  const total = ORDER.reduce((s, k) => s + proofCount(k), 0);
+  const full = ORDER.filter(k => proofCount(k) >= 10).length;
+  const srcs = new Set();
+  ORDER.forEach(k => (PROOFS[k] || []).forEach(p => p.url && srcs.add(p.url.replace(/^https?:\/\//, '').split('/')[0])));
+  document.getElementById('stats').innerHTML =
+    `<div class="stat"><b>${ORDER.length}</b>типов</div>` +
+    `<div class="stat"><b>${total}</b>доказательств</div>` +
+    `<div class="stat"><b>${full}</b>типов ≥10</div>` +
+    `<div class="stat"><b>${srcs.size}</b>источников</div>`;
+  document.getElementById('legend').innerHTML =
+    `<span class="lg">${ORDER.length} типов доказательств · собираем по 10–30 на каждый</span>`;
 }
 
-window.ProofMap = { TAXONOMY, STRENGTH, auditClaim, riskOf, objectionLoad, objectionsFor,
-                    sourceWeight, bestSource, sourceKind };
-if (typeof module !== 'undefined') module.exports = window.ProofMap;
+render();
+renderStats();
+resetView();
+window.addEventListener('resize', resetView);
 })();
