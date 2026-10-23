@@ -102,4 +102,14 @@ else
   fi
   echo "  ✅ закоммичено"
 fi
-git push origin main && echo "  ✅ запушено"
+if git push origin main 2>/dev/null; then
+  echo "  ✅ запушено"
+else
+  echo "  ⚠️ обычный push отклонён (история могла быть переписана локально)."
+  if [ -z "${PM_FORCE_PUSH:-}" ]; then
+    echo "  ❌ PM_FORCE_PUSH не задан — стоп. Переопредели осознанно для --force-with-lease."
+    exit 1
+  fi
+  echo "  PM_FORCE_PUSH задан — пушу через --force-with-lease"
+  git push --force-with-lease origin main && echo "  ✅ запушено (force-with-lease)"
+fi
