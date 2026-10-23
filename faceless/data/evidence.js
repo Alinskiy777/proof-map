@@ -2511,7 +2511,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Официальные пороги YPP 2026: 1000 подписчиков + 4000 часов ИЛИ 10 млн Shorts-просмотров",
   "quote": "1. Get 1,000 subscribers with 4,000 qualified watch hours in the last 12 months, or 2. Get 1,000 subscribers with 10 million qualified Shorts views in the last 90 days.",
-  "types": [],
+  "types": [9, 4],
   "strength": 6,
   "drama": 6,
   "level": [
@@ -2534,7 +2534,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "YouTube официально УДВАИВАЕТ порог с 1 февраля 2027: 8000 часов / 20 млн Shorts-просмотров",
   "quote": "Starting Feb. 1, 2027, YPP entry thresholds for new creators are changing to 8,000 qualified watch hours in the last 365 days, or 20M qualified Shorts views in the last 90 days, in addition to still needing 1k subscribers. If you are already in YPP, your status is not impacted by this update.",
-  "types": [],
+  "types": [9, 4],
   "strength": 7,
   "drama": 7,
   "level": [
@@ -2557,7 +2557,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Shorts: 10 млн просмотров за 90 дней КАЖДЫЙ месяц, иначе денег нет — но из YPP не выгоняют",
   "quote": "To earn each month from the Shorts Creator Pool, creators will now need to maintain 10M qualified Shorts views over the last 90 days. If you miss this threshold, you will not be removed from YPP and this will not impact other YPP earnings, including long-form video.",
-  "types": [],
+  "types": [9, 4],
   "strength": 7,
   "drama": 7,
   "level": [
@@ -2580,7 +2580,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Официальная политика «inauthentic content»: карается НЕ AI, а массовка",
   "quote": "July 15, 2025: We're making a minor update to our \"repetitious content\" policy to better clarify this includes content that is repetitive or mass-produced. We are also renaming this policy from \"repetitious content\" to \"inauthentic content.\" This type of content has always been ineligible for monetization under our existing policies, where creators are rewarded for original and authentic content.",
-  "types": [],
+  "types": [9, 8],
   "strength": 8,
   "drama": 8,
   "level": [
@@ -2603,7 +2603,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Официальный split: YouTube забирает 45%, автору идёт 55% (long-form) и 45% (Shorts)",
   "quote": "If a partner turns on Watch Page Ads by reviewing and accepting the Watch Page Monetization Module, YouTube will pay them 55% of net revenues from ads displayed or streamed on their public videos on their content Watch Page. ... YouTube will pay them 45% of the revenue allocated to them based on their share of views from the Creator Pool allocation.",
-  "types": [],
+  "types": [9, 4],
   "strength": 7,
   "drama": 7,
   "level": [
@@ -2626,7 +2626,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Порог первой выплаты AdSense: $100 / €70 / £60 — не $10K",
   "quote": "You'll be paid out when your outstanding earnings reach the payment threshold, as long as there are no holds on your account and you're in compliance with our Program policies. ... U.S. Dollar (USD) $0 $0 / $10 $10 $100 $10 ... Euro (EUR) N/A $0 / $10 equivalent €10 €70 €10 ... Great British Pound (GBP) N/A $0 / $10 equivalent £10 £60 £10",
-  "types": [],
+  "types": [9, 5],
   "strength": 9,
   "drama": 9,
   "level": [
@@ -2649,7 +2649,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "YouTube выплатил авторам $100+ млрд за 4 года — но деньги сконцентрированы наверху",
   "quote": "In the past four years alone, we've paid over $100 billion to creators, artists, and media companies. This success fuels economies. In 2024 in the U.S., YouTube's ecosystem contributed $55 billion to GDP and supported more than 490,000 full-time jobs as creators built businesses and hired employees within their communities.",
-  "types": [],
+  "types": [9, 11],
   "strength": 6,
   "drama": 6,
   "level": [
@@ -2672,7 +2672,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Открытый датасет: медианный RPM = $2.30 на 1000 просмотров, 58% всей выручки у топ-10% каналов",
   "quote": "Across 300 channels AIR Media-Tech works with, the median RPM was $2.30 per 1,000 views from May 2025 to May 2026. ... 58% of all ad revenue went to the top 10% of channels ... The median channel showed an ad on 53% of its views. The other 47% earned no ad revenue.",
-  "types": [],
+  "types": [9, 11, 4],
   "strength": 9,
   "drama": 9,
   "level": [
@@ -2695,7 +2695,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Gumroad (официальный отчёт платформы): медианный автор заработал $70 за год",
   "quote": "Collectively, Gumroad creators earned $142 million in 2020, up 94% from 2019. ... Divide the two numbers, and you get over $3,000 per creator. However, the median creator made only $70 in 2020. In fact, the top 1% of creators earned about 60% of the money in 2020. The top 10% of creators earned nearly 92% of the total GMV.",
-  "types": [],
+  "types": [9, 11],
   "strength": 8,
   "drama": 8,
   "level": [
@@ -2718,7 +2718,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Gumroad 2026: 44% продуктов не заработали ни копейки, медиана автора — $72/мес",
   "quote": "44% of all Gumroad products generated exactly $0 in revenue. ... The median Gumroad creator earned $72 per month in 2026. The top 1% earned $10,000 or more per month. ... Total tracked revenue across 146,271 Gumroad products in 2026: $206 million.",
-  "types": [],
+  "types": [9, 11],
   "strength": 8,
   "drama": 8,
   "level": [
@@ -2741,7 +2741,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Faceless-канал получил монетизацию через 4–5 часов после заявки (живая тема с 225 голосами)",
   "quote": "This is a faceless channel, that just got monetized in like 4-5 hours after I applied.",
-  "types": [],
+  "types": [13, 26],
   "strength": 9,
   "drama": 9,
   "level": [
@@ -2764,7 +2764,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Первая выплата: $1.18 на следующий день после монетизации; у других — $106 за месяц",
   "quote": "I remember the day after I got monitized I made $1.18 🤩 ... I've got $106 coming this month, payment for the last few months. I haven't been able to upload as much lately.",
-  "types": [],
+  "types": [13, 14],
   "strength": 8,
   "drama": 8,
   "level": [
@@ -2787,7 +2787,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "Честный год двухканального автора: 24 млн просмотров = $87K с YouTube + $46K партнёрки = $129K прибыли",
   "quote": "I'm doing this fulltime, worked pretty much every day on this in 2025. 2 Channels, in total 24million long-form views for the 2025. $87k from Youtube Views, $46k from various Affiliates, about $4k in Expenses for a total of $129k Profit.",
-  "types": [],
+  "types": [13, 14, 11],
   "strength": 8,
   "drama": 8,
   "level": [
@@ -2810,7 +2810,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "AI-slop каналы зарабатывали $117 млн в год — 278 каналов, 63 млрд просмотров, 221 млн подписчиков",
   "quote": "The video-editing company Kapwing surveyed 15,000 of the world's most popular YouTube channels – the top 100 in every country – and found that 278 of them contain only AI slop. Together, these AI slop channels have amassed more than 63bn views and 221 million subscribers, generating about $117m (£90m) in revenue each year, according to estimates. The researchers also made a new YouTube account and found that 104 of the first 500 videos recommended to its feed were AI slop.",
-  "types": [],
+  "types": [9, 4],
   "strength": 10,
   "drama": 10,
   "level": [
@@ -2833,7 +2833,7 @@ window.EVIDENCE = [
   "person": "",
   "title": "YouTube удалил 16 крупнейших AI-slop каналов ($9.78 млн/год) — и заявил: «генеративный AI — это инструмент»",
   "quote": "A report from Kapwing found that a channel called CuentosFacianantes no longer exists on the platform after amassing more than 5.9 million subscribers and over 1.2 billion total views. ... \"Generative AI is a tool, and like any tool it can be used to make both high and low quality content,\" YouTube spokesperson Boot Bullwinkle says in an emailed statement to The Verge.",
-  "types": [],
+  "types": [9, 8],
   "strength": 9,
   "drama": 9,
   "level": [
