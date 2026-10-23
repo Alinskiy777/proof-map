@@ -1,2 +1,8 @@
 # runtime guard state (перезаписывается каждые 60 сек)
 live-status.json
+# собранное сырьё Reddit/YouTube — промежуточные артефакты, не для публикации
+collect/__pycache__/
+collect/txt/
+
+# тяжёлые PNG-скриншоты (18 МБ) — только локально, на сайте JPEG-копии
+shots/
