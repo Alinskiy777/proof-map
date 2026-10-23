@@ -145,7 +145,7 @@ function render() {
   const board = $('#board');
 
   if (!list.length) {
-    board.innerHTML = '<div class="empty">Ничего не найдено<small>Ослабьте фильтры или сбросьте их — в базе 108 записей.</small></div>';
+    board.innerHTML = '<div class="empty">Ничего не найдено<small>Ослабьте фильтры или сбросьте их — в базе ' + EV.length + ' записей.</small></div>';
   } else {
     const note = state.groupBy === 'type'
       ? '<p class="hint" style="max-width:100%;margin-bottom:16px;font-size:12.5px">Одна запись может использовать несколько приёмов сразу — поэтому числа в группах больше числа записей.</p>' : '';
@@ -222,6 +222,13 @@ function renderAudit(list) {
   $('#missing').innerHTML = missing.length
     ? missing.map(t => `<span class="chip" style="--c:${(TYPES[t] || {}).color}">${t} · ${esc((TYPES[t] || {}).name)}</span>`).join('')
     : '<span class="ok">все 30 приёмов покрыты</span>';
+
+  /* записи без приёма — честный показ пробела разметки */
+  const untyped = list.filter(r => !(r.types || []).length);
+  $('#untyped').innerHTML = untyped.length
+    ? `<p class="dim">${untyped.length} из ${list.length} записей ещё не размечены приёмом —
+       они собраны в группе «Без приёма» и не участвуют в фильтре по приёмам.</p>`
+    : '<span class="ok">все записи размечены приёмами</span>';
 }
 
 /* ── фильтры ── */
@@ -317,10 +324,10 @@ function closeDetail() {
 
 /* ── галерея скриншотов ── */
 const SHOTS = [
-  ['comp-facelesslaunchpad', 'Faceless Launchpad — лендинг', 'shots/comp-facelesslaunchpad.jpg'],
-  ['comp-theartofyt', 'The Art of YT — лендинг', 'shots/comp-theartofyt.jpg'],
-  ['comp-becomeviral', 'Become Viral — лендинг', 'shots/comp-becomeviral.jpg'],
-  ['comp-1of10', '1of10 — лендинг', 'shots/comp-1of10.jpg'],
+  ['comp-facelesslaunchpad', 'Faceless Launchpad — сайт', 'shots/comp-facelesslaunchpad.jpg'],
+  ['comp-theartofyt', 'The Art of YT — сайт', 'shots/comp-theartofyt.jpg'],
+  ['comp-becomeviral', 'Become Viral — сайт', 'shots/comp-becomeviral.jpg'],
+  ['comp-1of10', '1of10 — сайт', 'shots/comp-1of10.jpg'],
   ['press-fortune', 'Fortune — Adavia Davis ($700K/год)', 'shots/press-fortune.jpg'],
   ['press-news4jax', 'News4Jax — Lionel Barnes ($38 → $10 000)', 'shots/press-news4jax.jpg'],
   ['press-bi', 'Business Insider — Quentin Latham', 'shots/press-bi.jpg'],
@@ -334,7 +341,7 @@ const SHOTS = [
 function renderShots() {
   $('#shots').innerHTML = SHOTS.map(([id, cap, src]) => `
     <figure class="shot"><a href="${esc(src)}" target="_blank" rel="noopener">
-      <img src="${esc(src)}" alt="${esc(cap)}" loading="lazy"></a>
+      <img src="${esc(src)}" alt="${esc(cap)}" decoding="async"></a>
       <figcaption>${esc(cap)}</figcaption></figure>`).join('');
 }
 
