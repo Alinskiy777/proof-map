@@ -3,6 +3,12 @@ live-status.json
 # собранное сырьё Reddit/YouTube — промежуточные артефакты, не для публикации
 collect/__pycache__/
 collect/txt/
+# данные сбора: ники Reddit/Instagram, тексты постов, очередь конкурентов (users.txt).
+# В публичном репозитории их быть не должно — только локально.
+collect/*.json
+collect/*.jsonl
+collect/*.log
+collect/*.txt
 
 # тяжёлые PNG-скриншоты (18 МБ) — только локально, на сайте JPEG-копии
 shots/
